@@ -1,1 +1,63 @@
-
+<div class="content-section active" id="dashboard-content">
+    <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        <div id="current-date"></div>
+    </div>
+    
+    <div class="stats-container">
+        <div class="stat-card">
+            <i class="fas fa-truck-loading icon"></i>
+            <h3>Active Tenders</h3>
+            <div class="value" id="active-tenders">0</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-users icon"></i>
+            <h3>Total Drivers</h3>
+            <div class="value" id="total-drivers">0</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-exclamation-triangle icon"></i>
+            <h3>Pending Payments</h3>
+            <div class="value" id="pending-payments">0</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-euro-sign icon"></i>
+            <h3>Monthly Revenue</h3>
+            <div class="value" id="monthly-revenue">€0</div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <h2>Recent Tenders</h2>
+            <button class="btn btn-primary" onclick="openModal('tender-modal')">
+                <i class="fas fa-plus"></i> New Tender
+            </button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Route</th>
+                    <th>Driver</th>
+                    <th>Distance</th>
+                    <th>Load %</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="recent-tenders">
+                <!-- Tenders will be populated here -->
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="section">
+        <div class="section-header">
+            <h2>Performance Overview</h2>
+        </div>
+        <div class="chart-container">
+            <canvas id="performance-chart"></canvas>
+        </div>
+    </div>
+</div>
