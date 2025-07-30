@@ -1,1 +1,25 @@
-
+<div class="content-section" id="drivers-content">
+    <div class="section">
+        <div class="section-header">
+            <h2>Driver Management</h2>
+            <button class="btn btn-primary" onclick="openModal('driver-modal')">
+                <i class="fas fa-plus"></i> Add Driver
+            </button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th>Assigned Tenders</th>
+                    <th>Avg. Load %</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="drivers-list">
+                <!-- Drivers will be populated here -->
+            </tbody>
+        </table>
+    </div>
+</div>
