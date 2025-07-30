@@ -2,6 +2,31 @@
 <html lang="en">
 <head>
     <!-- ... existing head content ... -->
+    <style>
+        /* ... existing styles ... */
+        
+        /* Add loader animation */
+        .view-loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <!-- ... existing body content ... -->
@@ -30,8 +55,42 @@
             // Check for expiring inspections
             checkExpiringInspections();
             
+            // Setup event listeners for the app
+            setupAppEventListeners();
+            
             // Initialize views
             initView();
+        }
+        
+        // Setup event listeners after login
+        function setupAppEventListeners() {
+            // Set up navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const target = this.getAttribute('data-target');
+                    loadView(target);
+                });
+            });
+            
+            // Initialize file uploads
+            document.getElementById('tender-upload-area').addEventListener('click', function() {
+                document.getElementById('tender-file').click();
+            });
+            
+            document.getElementById('invoice-upload-area').addEventListener('click', function() {
+                document.getElementById('invoice-file').click();
+            });
+            
+            // Notification and chat icons
+            document.getElementById('notification-icon').addEventListener('click', toggleNotificationPanel);
+            document.getElementById('chat-icon').addEventListener('click', toggleChatPanel);
+            
+            // Chat send button
+            document.getElementById('chat-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
         }
         
         // Initialize views after login
@@ -624,35 +683,137 @@
             `;
             container.appendChild(newEntry);
         }
+        
+        // Chat functions
+        function toggleNotificationPanel() {
+            const panel = document.getElementById('notification-panel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        function closeNotificationPanel() {
+            document.getElementById('notification-panel').style.display = 'none';
+        }
+        
+        function renderNotifications() {
+            const container = document.getElementById('notification-list');
+            if (!container) return;
+            
+            container.innerHTML = appState.notifications.map(notification => `
+                <div class="notification-item ${notification.read ? '' : 'unread'}" onclick="markNotificationRead(${notification.id})">
+                    <div class="notification-title">
+                        <i class="fas fa-${notification.type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                        ${notification.title}
+                    </div>
+                    <div class="notification-message">${notification.message}</div>
+                    <div class="notification-time">${new Date(notification.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        
+        function updateNotificationBadge() {
+            const unread = appState.notifications.filter(n => !n.read).length;
+            const badge = document.getElementById('notification-count');
+            if (badge) badge.textContent = unread;
+        }
+        
+        function toggleChatPanel() {
+            const panel = document.getElementById('chat-panel');
+            if (panel) {
+                panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+                // Scroll to bottom when opening
+                if (panel.style.display === 'flex') {
+                    const messages = document.getElementById('chat-messages');
+                    messages.scrollTop = messages.scrollHeight;
+                }
+            }
+        }
+        
+        function closeChatPanel() {
+            const panel = document.getElementById('chat-panel');
+            if (panel) panel.style.display = 'none';
+        }
+        
+        function renderChatMessages() {
+            const container = document.getElementById('chat-messages');
+            if (!container) return;
+            
+            container.innerHTML = appState.chatMessages.map(msg => `
+                <div class="message ${msg.sender === appState.currentUser.name ? 'sent' : 'received'}">
+                    <div class="message-sender">${msg.sender}</div>
+                    <div class="message-text">${msg.message}</div>
+                    <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</div>
+                </div>
+            `).join('');
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            if (!input) return;
+            
+            const message = input.value.trim();
+            if (message && appState.currentUser) {
+                appState.chatMessages.push({
+                    id: Date.now(),
+                    sender: appState.currentUser.name,
+                    message: message,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Save to localStorage
+                saveAppData({
+                    ...loadAppData(),
+                    chatMessages: appState.chatMessages
+                });
+                
+                // Update UI
+                renderChatMessages();
+                input.value = '';
+            }
+        }
 
-        // ... rest of existing functions ...
-
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const { users } = loadAppData();
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                appState.currentUser = user;
+                
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                document.getElementById('current-user').textContent = user.name;
+                document.getElementById('current-role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+                
+                // Initialize the app after login
+                initApp();
+            } else {
+                alert('Invalid credentials. Please try again.');
+            }
+        }
+        
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Set up navigation
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    const target = this.getAttribute('data-target');
-                    loadView(target);
-                });
-            });
-            
-            // Initialize file uploads
-            document.getElementById('tender-upload-area').addEventListener('click', function() {
-                document.getElementById('tender-file').click();
-            });
-            
-            document.getElementById('invoice-upload-area').addEventListener('click', function() {
-                document.getElementById('invoice-file').click();
-            });
-            
-            // Notification and chat icons
-            document.getElementById('notification-icon').addEventListener('click', toggleNotificationPanel);
-            document.getElementById('chat-icon').addEventListener('click', toggleChatPanel);
+            // Add chat icon ID if missing
+            if (!document.getElementById('chat-icon')) {
+                const chatIcon = document.querySelector('.chat-icon');
+                if (chatIcon) chatIcon.id = 'chat-icon';
+            }
             
             // Initialize demo data if needed
             if (!localStorage.getItem('transport_users')) {
                 initDemoData();
+            }
+            
+            // Add login button event listener
+            const loginBtn = document.querySelector('.btn.btn-primary.btn-block');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', login);
             }
         });
     </script>
