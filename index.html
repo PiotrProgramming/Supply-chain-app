@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* CSS will be included here to ensure styling consistency */
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -482,6 +483,21 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Section transitions */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -549,7 +565,384 @@
             </div>
             
             <div class="main-content" id="main-content">
-                <!-- Content will be loaded here dynamically -->
+                <!-- Dashboard Content -->
+                <div class="content-section active" id="dashboard-content">
+                    <div class="dashboard-header">
+                        <h1>Dashboard</h1>
+                        <div id="current-date"></div>
+                    </div>
+                    
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <i class="fas fa-truck-loading icon"></i>
+                            <h3>Active Tenders</h3>
+                            <div class="value" id="active-tenders">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-users icon"></i>
+                            <h3>Total Drivers</h3>
+                            <div class="value" id="total-drivers">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-exclamation-triangle icon"></i>
+                            <h3>Pending Payments</h3>
+                            <div class="value" id="pending-payments">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-euro-sign icon"></i>
+                            <h3>Monthly Revenue</h3>
+                            <div class="value" id="monthly-revenue">€0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <h2>Recent Tenders</h2>
+                            <button class="btn btn-primary" onclick="openModal('tender-modal')">
+                                <i class="fas fa-plus"></i> New Tender
+                            </button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Route</th>
+                                    <th>Driver</th>
+                                    <th>Distance</th>
+                                    <th>Load %</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-tenders">
+                                <!-- Tenders will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <h2>Performance Overview</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="performance-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Drivers Content -->
+                <div class="content-section" id="drivers-content">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2>Driver Management</h2>
+                            <button class="btn btn-primary" onclick="openModal('driver-modal')">
+                                <i class="fas fa-plus"></i> Add Driver
+                            </button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                    <th>Assigned Tenders</th>
+                                    <th>Avg. Load %</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="drivers-list">
+                                <!-- Drivers will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Tenders Content -->
+                <div class="content-section" id="tenders-content">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2>All Tenders</h2>
+                            <button class="btn btn-primary" onclick="openModal('tender-modal')">
+                                <i class="fas fa-plus"></i> New Tender
+                            </button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Route</th>
+                                    <th>Driver</th>
+                                    <th>Distance</th>
+                                    <th>Load %</th>
+                                    <th>Status</th>
+                                    <th>Revenue</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="all-tenders">
+                                <!-- All tenders will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Payments Content -->
+                <div class="content-section" id="payments-content">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2>Payment Management</h2>
+                            <button class="btn btn-primary" onclick="openModal('payment-modal')">
+                                <i class="fas fa-plus"></i> Add Payment
+                            </button>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Invoice #</th>
+                                    <th>Tender ID</th>
+                                    <th>Amount</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-list">
+                                <!-- Payments will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Reports Content -->
+                <div class="content-section" id="reports-content">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2>Performance Reports</h2>
+                            <div>
+                                <button class="btn btn-primary" onclick="generateReport('weekly')">
+                                    <i class="fas fa-download"></i> Weekly Report
+                                </button>
+                                <button class="btn btn-success" style="margin-left: 10px;" onclick="generateReport('monthly')">
+                                    <i class="fas fa-download"></i> Monthly Report
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="tabs">
+                            <div class="tab active" data-tab="driver-reports">Driver Reports</div>
+                            <div class="tab" data-tab="fleet-reports">Fleet Reports</div>
+                            <div class="tab" data-tab="financial-reports">Financial Reports</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="driver-reports">
+                            <h3>Driver Performance</h3>
+                            <div class="chart-container">
+                                <canvas id="driver-performance-chart"></canvas>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Driver</th>
+                                        <th>Tenders</th>
+                                        <th>Total Km</th>
+                                        <th>Avg. Load %</th>
+                                        <th>Revenue</th>
+                                        <th>€/Km</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="driver-performance-data">
+                                    <!-- Driver performance data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="tab-content" id="fleet-reports">
+                            <h3>Fleet Utilization</h3>
+                            <div class="chart-container">
+                                <canvas id="fleet-utilization-chart"></canvas>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fleet-utilization-data">
+                                    <tr>
+                                        <td>Total Kilometers</td>
+                                        <td id="total-km">0 km</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Average Load Percentage</td>
+                                        <td id="avg-load">0%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Revenue per Kilometer</td>
+                                        <td id="revenue-per-km">€0.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="tab-content" id="financial-reports">
+                            <h3>Revenue Overview</h3>
+                            <div class="chart-container">
+                                <canvas id="revenue-chart"></canvas>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Period</th>
+                                        <th>Revenue</th>
+                                        <th>Expenses</th>
+                                        <th>Profit</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="financial-data">
+                                    <tr>
+                                        <td>This Week</td>
+                                        <td id="week-revenue">€0</td>
+                                        <td id="week-expenses">€0</td>
+                                        <td id="week-profit">€0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>This Month</td>
+                                        <td id="month-revenue">€0</td>
+                                        <td id="month-expenses">€0</td>
+                                        <td id="month-profit">€0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Admin Content -->
+                <div class="content-section" id="admin-content">
+                    <div class="section">
+                        <div class="section-header">
+                            <h2>Administration</h2>
+                        </div>
+                        
+                        <div class="tabs">
+                            <div class="tab active" data-tab="users">Users</div>
+                            <div class="tab" data-tab="github">GitHub Sync</div>
+                            <div class="tab" data-tab="settings">Settings</div>
+                        </div>
+                        
+                        <div class="tab-content active" id="users">
+                            <h3>User Management</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Name</th>
+                                        <th>Role</th>
+                                        <th>Last Login</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-list">
+                                    <tr>
+                                        <td>admin</td>
+                                        <td>Administrator</td>
+                                        <td><span class="role-badge role-admin">Admin</span></td>
+                                        <td>Today</td>
+                                        <td>
+                                            <button class="btn btn-warning" style="padding: 5px 10px;">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>dispatcher1</td>
+                                        <td>John Smith</td>
+                                        <td><span class="role-badge role-dispatcher">Dispatcher</span></td>
+                                        <td>Yesterday</td>
+                                        <td>
+                                            <button class="btn btn-warning" style="padding: 5px 10px;">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button class="btn btn-primary" style="margin-top: 15px;" onclick="openModal('user-modal')">
+                                <i class="fas fa-plus"></i> Add User
+                            </button>
+                        </div>
+                        
+                        <div class="tab-content" id="github">
+                            <h3>GitHub Data Sync</h3>
+                            <div class="github-sync">
+                                <p>Sync your data with GitHub to make it accessible from any device:</p>
+                                
+                                <div class="form-group">
+                                    <label for="github-repo">GitHub Repository</label>
+                                    <input type="text" id="github-repo" placeholder="username/repo-name">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="github-token">GitHub Access Token</label>
+                                    <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" value="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">
+                                    <small>Create a token with "repo" permissions in GitHub settings</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="github-filename">Data Filename</label>
+                                    <input type="text" id="github-filename" value="transport-data.json">
+                                </div>
+                                
+                                <div id="sync-status" class="sync-status sync-pending">
+                                    <i class="fas fa-sync"></i> Sync not performed yet
+                                </div>
+                                
+                                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                    <button class="btn btn-primary" onclick="saveToGitHub()">
+                                        <i class="fas fa-cloud-upload-alt"></i> Save to GitHub
+                                    </button>
+                                    <button class="btn btn-success" onclick="loadFromGitHub()">
+                                        <i class="fas fa-cloud-download-alt"></i> Load from GitHub
+                                    </button>
+                                </div>
+                                
+                                <div style="margin-top: 20px;">
+                                    <h4>How to set up:</h4>
+                                    <ol style="text-align: left; margin-left: 20px;">
+                                        <li>Create a new repository on GitHub</li>
+                                        <li>Generate a personal access token with "repo" permissions</li>
+                                        <li>Enter your repository name (username/repo-name)</li>
+                                        <li>Enter your access token</li>
+                                        <li>Click "Save to GitHub" to upload your data</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="settings">
+                            <h3>Application Settings</h3>
+                            <div class="form-group">
+                                <label for="currency">Currency</label>
+                                <select id="currency" class="form-control">
+                                    <option value="€">Euro (€)</option>
+                                    <option value="$">Dollar ($)</option>
+                                    <option value="£">Pound (£)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="distance-unit">Distance Unit</label>
+                                <select id="distance-unit" class="form-control">
+                                    <option value="km">Kilometers</option>
+                                    <option value="mi">Miles</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" onclick="saveSettings()">
+                                Save Settings
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -779,16 +1172,16 @@
             }
         };
         
-        // Initialize demo data with proper error handling
+        // Initialize demo data
         function initDemoData() {
-            const defaultDrivers = [
+            const drivers = [
                 { id: 1, firstName: "John", lastName: "Smith", contact: "+49 123 456 789", license: "DL12345678", status: "active", assignedTenders: 3, avgLoad: 78 },
                 { id: 2, firstName: "Emma", lastName: "Johnson", contact: "+49 987 654 321", license: "DL23456789", status: "active", assignedTenders: 2, avgLoad: 85 },
                 { id: 3, firstName: "Robert", lastName: "Davis", contact: "+49 555 123 456", license: "DL34567890", status: "active", assignedTenders: 4, avgLoad: 65 },
                 { id: 4, firstName: "Sophia", lastName: "Miller", contact: "+49 111 222 333", license: "DL45678901", status: "inactive", assignedTenders: 0, avgLoad: 0 }
             ];
             
-            const defaultTenders = [
+            const tenders = [
                 { id: 1, origin: "Berlin", destination: "Hamburg", driverId: 1, driver: "John Smith", distance: 290, load: 90, status: "delivered", revenue: 1450, cargo: "Electronics", createdAt: new Date(Date.now() - 86400000).toISOString() },
                 { id: 2, origin: "Munich", destination: "Frankfurt", driverId: 2, driver: "Emma Johnson", distance: 390, load: 85, status: "in_progress", revenue: 1950, cargo: "Furniture", createdAt: new Date(Date.now() - 172800000).toISOString() },
                 { id: 3, origin: "Cologne", destination: "Stuttgart", driverId: 3, driver: "Robert Davis", distance: 250, load: 70, status: "assigned", revenue: 1250, cargo: "Automotive parts", createdAt: new Date(Date.now() - 259200000).toISOString() },
@@ -796,104 +1189,64 @@
                 { id: 5, origin: "Düsseldorf", destination: "Hannover", driverId: 3, driver: "Robert Davis", distance: 280, load: 80, status: "delivered", revenue: 1400, cargo: "Industrial equipment", createdAt: new Date(Date.now() - 432000000).toISOString() }
             ];
             
-            const defaultPayments = [
+            const payments = [
                 { id: 1, tenderId: 1, invoiceNumber: "INV-2023-001", amount: 1450, issueDate: "2023-01-15", dueDate: "2023-02-15", status: "paid", paymentDate: "2023-02-10" },
                 { id: 2, tenderId: 5, invoiceNumber: "INV-2023-002", amount: 1400, issueDate: "2023-02-01", dueDate: "2023-03-01", status: "paid", paymentDate: "2023-02-28" },
                 { id: 3, tenderId: 2, invoiceNumber: "INV-2023-003", amount: 1950, issueDate: "2023-03-10", dueDate: "2023-04-10", status: "pending" }
             ];
             
-            const defaultUsers = [
+            const users = [
                 { username: "admin", password: "admin123", name: "Administrator", role: "admin", lastLogin: new Date().toISOString() },
                 { username: "dispatcher1", password: "dispatch123", name: "John Smith", role: "dispatcher", lastLogin: new Date(Date.now() - 86400000).toISOString() }
             ];
             
-            const defaultSettings = {
+            localStorage.setItem('transport_drivers', JSON.stringify(drivers));
+            localStorage.setItem('transport_tenders', JSON.stringify(tenders));
+            localStorage.setItem('transport_payments', JSON.stringify(payments));
+            localStorage.setItem('transport_users', JSON.stringify(users));
+            localStorage.setItem('transport_settings', JSON.stringify({
                 currency: '€',
                 distanceUnit: 'km'
-            };
+            }));
             
+            // Initialize GitHub config
             const githubConfig = {
                 repo: '',
                 token: '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',
                 filename: 'transport-data.json'
             };
-            
-            // Initialize with safe defaults if storage is empty
-            if (!localStorage.getItem('transport_drivers')) {
-                localStorage.setItem('transport_drivers', JSON.stringify(defaultDrivers));
-            }
-            if (!localStorage.getItem('transport_tenders')) {
-                localStorage.setItem('transport_tenders', JSON.stringify(defaultTenders));
-            }
-            if (!localStorage.getItem('transport_payments')) {
-                localStorage.setItem('transport_payments', JSON.stringify(defaultPayments));
-            }
-            if (!localStorage.getItem('transport_users')) {
-                localStorage.setItem('transport_users', JSON.stringify(defaultUsers));
-            }
-            if (!localStorage.getItem('transport_settings')) {
-                localStorage.setItem('transport_settings', JSON.stringify(defaultSettings));
-            }
-            if (!localStorage.getItem('github_config')) {
-                localStorage.setItem('github_config', JSON.stringify(githubConfig));
-            }
+            localStorage.setItem('github_config', JSON.stringify(githubConfig));
         }
         
-        // Load application data with error handling
+        // Load application data
         function loadAppData() {
-            try {
-                // Initialize with default data if not exists
-                initDemoData();
-                
-                // Parse data with proper error handling
-                const drivers = JSON.parse(localStorage.getItem('transport_drivers') || '[]');
-                const tenders = JSON.parse(localStorage.getItem('transport_tenders') || '[]');
-                const payments = JSON.parse(localStorage.getItem('transport_payments') || '[]');
-                const users = JSON.parse(localStorage.getItem('transport_users') || '[]');
-                const settings = JSON.parse(localStorage.getItem('transport_settings') || '{}');
-                
-                // Validate data structure
-                if (!Array.isArray(drivers)) throw new Error('Invalid drivers data');
-                if (!Array.isArray(tenders)) throw new Error('Invalid tenders data');
-                if (!Array.isArray(payments)) throw new Error('Invalid payments data');
-                if (!Array.isArray(users)) throw new Error('Invalid users data');
-                
-                // Update app state
-                appState.currency = settings.currency || '€';
-                appState.distanceUnit = settings.distanceUnit || 'km';
-                
-                // Update GitHub config
-                const githubConfig = JSON.parse(localStorage.getItem('github_config') || '{}');
-                appState.githubConfig = {
-                    repo: githubConfig.repo || '',
-                    token: githubConfig.token || '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',
-                    filename: githubConfig.filename || 'transport-data.json'
-                };
-                
-                return { drivers, tenders, payments, users };
-            } catch (error) {
-                console.error('Error loading app data:', error);
-                // Reset to default data if parsing fails
-                localStorage.clear();
-                initDemoData();
-                return loadAppData(); // Recursively try again
-            }
+            const drivers = JSON.parse(localStorage.getItem('transport_drivers') || '[]');
+            const tenders = JSON.parse(localStorage.getItem('transport_tenders') || '[]');
+            const payments = JSON.parse(localStorage.getItem('transport_payments') || '[]');
+            const users = JSON.parse(localStorage.getItem('transport_users') || '[]');
+            const settings = JSON.parse(localStorage.getItem('transport_settings') || '{}');
+            
+            // Update app state
+            appState.currency = settings.currency || '€';
+            appState.distanceUnit = settings.distanceUnit || 'km';
+            
+            // Update GitHub config
+            const githubConfig = JSON.parse(localStorage.getItem('github_config') || '{}');
+            appState.githubConfig = {
+                repo: githubConfig.repo || '',
+                token: githubConfig.token || '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',
+                filename: githubConfig.filename || 'transport-data.json'
+            };
+            
+            return { drivers, tenders, payments, users };
         }
         
-        // Save application data with error handling
+        // Save application data
         function saveAppData(data) {
-            try {
-                if (!data || typeof data !== 'object') throw new Error('Invalid data to save');
-                
-                localStorage.setItem('transport_drivers', JSON.stringify(data.drivers || []));
-                localStorage.setItem('transport_tenders', JSON.stringify(data.tenders || []));
-                localStorage.setItem('transport_payments', JSON.stringify(data.payments || []));
-                localStorage.setItem('transport_users', JSON.stringify(data.users || []));
-                return true;
-            } catch (error) {
-                console.error('Error saving app data:', error);
-                return false;
-            }
+            localStorage.setItem('transport_drivers', JSON.stringify(data.drivers));
+            localStorage.setItem('transport_tenders', JSON.stringify(data.tenders));
+            localStorage.setItem('transport_payments', JSON.stringify(data.payments));
+            localStorage.setItem('transport_users', JSON.stringify(data.users));
         }
         
         // Authentication functions
@@ -916,8 +1269,18 @@
                 document.getElementById('current-user').textContent = user.name;
                 document.getElementById('current-role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
                 
-                // Load content
-                loadContent('dashboard');
+                // Initialize demo data if not exists
+                if (!localStorage.getItem('transport_drivers')) {
+                    initDemoData();
+                }
+                
+                // Update UI
+                updateDashboard();
+                renderDrivers();
+                renderAllTenders();
+                renderRecentTenders();
+                renderPayments();
+                initCharts();
                 
                 // Load GitHub config
                 const githubConfig = JSON.parse(localStorage.getItem('github_config') || {});
@@ -959,472 +1322,56 @@
             document.getElementById(modalId).style.display = 'none';
         }
         
-        // Content loading function
-        function loadContent(page) {
-            const mainContent = document.getElementById('main-content');
-            
-            // Clear current content
-            mainContent.innerHTML = '';
-            
-            // Load content based on page
-            switch(page) {
-                case 'dashboard':
-                    mainContent.innerHTML = `
-                        <div class="content-section active" id="dashboard-content">
-                            <div class="dashboard-header">
-                                <h1>Dashboard</h1>
-                                <div id="current-date"></div>
-                            </div>
-                            
-                            <div class="stats-container">
-                                <div class="stat-card">
-                                    <i class="fas fa-truck-loading icon"></i>
-                                    <h3>Active Tenders</h3>
-                                    <div class="value" id="active-tenders">0</div>
-                                </div>
-                                <div class="stat-card">
-                                    <i class="fas fa-users icon"></i>
-                                    <h3>Total Drivers</h3>
-                                    <div class="value" id="total-drivers">0</div>
-                                </div>
-                                <div class="stat-card">
-                                    <i class="fas fa-exclamation-triangle icon"></i>
-                                    <h3>Pending Payments</h3>
-                                    <div class="value" id="pending-payments">0</div>
-                                </div>
-                                <div class="stat-card">
-                                    <i class="fas fa-euro-sign icon"></i>
-                                    <h3>Monthly Revenue</h3>
-                                    <div class="value" id="monthly-revenue">€0</div>
-                                </div>
-                            </div>
-                            
-                            <div class="section">
-                                <div class="section-header">
-                                    <h2>Recent Tenders</h2>
-                                    <button class="btn btn-primary" onclick="openModal('tender-modal')">
-                                        <i class="fas fa-plus"></i> New Tender
-                                    </button>
-                                </div>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Route</th>
-                                            <th>Driver</th>
-                                            <th>Distance</th>
-                                            <th>Load %</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="recent-tenders">
-                                        <!-- Tenders will be populated here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            
-                            <div class="section">
-                                <div class="section-header">
-                                    <h2>Performance Overview</h2>
-                                </div>
-                                <div class="chart-container">
-                                    <canvas id="performance-chart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    updateDashboard();
-                    renderRecentTenders();
-                    initCharts();
-                    break;
-                    
-                case 'drivers':
-                    mainContent.innerHTML = `
-                        <div class="content-section" id="drivers-content">
-                            <div class="section">
-                                <div class="section-header">
-                                    <h2>Driver Management</h2>
-                                    <button class="btn btn-primary" onclick="openModal('driver-modal')">
-                                        <i class="fas fa-plus"></i> Add Driver
-                                    </button>
-                                </div>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Contact</th>
-                                            <th>Status</th>
-                                            <th>Assigned Tenders</th>
-                                            <th>Avg. Load %</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="drivers-list">
-                                        <!-- Drivers will be populated here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    `;
-                    renderDrivers();
-                    break;
-                    
-                case 'tenders':
-                    mainContent.innerHTML = `
-                        <div class="content-section" id="tenders-content">
-                            <div class="section">
-                                <div class="section-header">
-                                    <h2>All Tenders</h2>
-                                    <button class="btn btn-primary" onclick="openModal('tender-modal')">
-                                        <i class="fas fa-plus"></i> New Tender
-                                    </button>
-                                </div>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Route</th>
-                                            <th>Driver</th>
-                                            <th>Distance</th>
-                                            <th>Load %</th>
-                                            <th>Status</th>
-                                            <th>Revenue</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="all-tenders">
-                                        <!-- All tenders will be populated here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    `;
-                    renderAllTenders();
-                    break;
-                    
-                case 'payments':
-                    mainContent.innerHTML = `
-                        <div class="content-section" id="payments-content">
-                            <div class="section">
-                                <div class="section-header">
-                                    <h2>Payment Management</h2>
-                                    <button class="btn btn-primary" onclick="openModal('payment-modal')">
-                                        <i class="fas fa-plus"></i> Add Payment
-                                    </button>
-                                </div>
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Invoice #</th>
-                                            <th>Tender ID</th>
-                                            <th>Amount</th>
-                                            <th>Due Date</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="payments-list">
-                                        <!-- Payments will be populated here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    `;
-                    renderPayments();
-                    break;
-                    
-                case 'reports':
-                    mainContent.innerHTML = `
-                        <div class="content-section" id="reports-content">
-                            <div class="section">
-                                <div class="section-header">
-                                    <h2>Performance Reports</h2>
-                                    <div>
-                                        <button class="btn btn-primary" onclick="generateReport('weekly')">
-                                            <i class="fas fa-download"></i> Weekly Report
-                                        </button>
-                                        <button class="btn btn-success" style="margin-left: 10px;" onclick="generateReport('monthly')">
-                                            <i class="fas fa-download"></i> Monthly Report
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div class="tabs">
-                                    <div class="tab active" data-tab="driver-reports">Driver Reports</div>
-                                    <div class="tab" data-tab="fleet-reports">Fleet Reports</div>
-                                    <div class="tab" data-tab="financial-reports">Financial Reports</div>
-                                </div>
-                                
-                                <div class="tab-content active" id="driver-reports">
-                                    <h3>Driver Performance</h3>
-                                    <div class="chart-container">
-                                        <canvas id="driver-performance-chart"></canvas>
-                                    </div>
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Driver</th>
-                                                <th>Tenders</th>
-                                                <th>Total Km</th>
-                                                <th>Avg. Load %</th>
-                                                <th>Revenue</th>
-                                                <th>€/Km</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="driver-performance-data">
-                                            <!-- Driver performance data will be populated here -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                                
-                                <div class="tab-content" id="fleet-reports">
-                                    <h3>Fleet Utilization</h3>
-                                    <div class="chart-container">
-                                        <canvas id="fleet-utilization-chart"></canvas>
-                                    </div>
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Metric</th>
-                                                <th>Value</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="fleet-utilization-data">
-                                            <tr>
-                                                <td>Total Kilometers</td>
-                                                <td id="total-km">0 km</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Average Load Percentage</td>
-                                                <td id="avg-load">0%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Revenue per Kilometer</td>
-                                                <td id="revenue-per-km">€0.00</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                
-                                <div class="tab-content" id="financial-reports">
-                                    <h3>Revenue Overview</h3>
-                                    <div class="chart-container">
-                                        <canvas id="revenue-chart"></canvas>
-                                    </div>
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Period</th>
-                                                <th>Revenue</th>
-                                                <th>Expenses</th>
-                                                <th>Profit</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="financial-data">
-                                            <tr>
-                                                <td>This Week</td>
-                                                <td id="week-revenue">€0</td>
-                                                <td id="week-expenses">€0</td>
-                                                <td id="week-profit">€0</td>
-                                            </tr>
-                                            <tr>
-                                                <td>This Month</td>
-                                                <td id="month-revenue">€0</td>
-                                                <td id="month-expenses">€0</td>
-                                                <td id="month-profit">€0</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    updateReports();
-                    break;
-                    
-                case 'admin':
-                    mainContent.innerHTML = `
-                        <div class="content-section" id="admin-content">
-                            <div class="section">
-                                <div class="section-header">
-                                    <h2>Administration</h2>
-                                </div>
-                                
-                                <div class="tabs">
-                                    <div class="tab active" data-tab="users">Users</div>
-                                    <div class="tab" data-tab="github">GitHub Sync</div>
-                                    <div class="tab" data-tab="settings">Settings</div>
-                                </div>
-                                
-                                <div class="tab-content active" id="users">
-                                    <h3>User Management</h3>
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>Username</th>
-                                                <th>Name</th>
-                                                <th>Role</th>
-                                                <th>Last Login</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="users-list">
-                                            <tr>
-                                                <td>admin</td>
-                                                <td>Administrator</td>
-                                                <td><span class="role-badge role-admin">Admin</span></td>
-                                                <td>Today</td>
-                                                <td>
-                                                    <button class="btn btn-warning" style="padding: 5px 10px;">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>dispatcher1</td>
-                                                <td>John Smith</td>
-                                                <td><span class="role-badge role-dispatcher">Dispatcher</span></td>
-                                                <td>Yesterday</td>
-                                                <td>
-                                                    <button class="btn btn-warning" style="padding: 5px 10px;">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="openModal('user-modal')">
-                                        <i class="fas fa-plus"></i> Add User
-                                    </button>
-                                </div>
-                                
-                                <div class="tab-content" id="github">
-                                    <h3>GitHub Data Sync</h3>
-                                    <div class="github-sync">
-                                        <p>Sync your data with GitHub to make it accessible from any device:</p>
-                                        
-                                        <div class="form-group">
-                                            <label for="github-repo">GitHub Repository</label>
-                                            <input type="text" id="github-repo" placeholder="username/repo-name">
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="github-token">GitHub Access Token</label>
-                                            <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" value="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">
-                                            <small>Create a token with "repo" permissions in GitHub settings</small>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label for="github-filename">Data Filename</label>
-                                            <input type="text" id="github-filename" value="transport-data.json">
-                                        </div>
-                                        
-                                        <div id="sync-status" class="sync-status sync-pending">
-                                            <i class="fas fa-sync"></i> Sync not performed yet
-                                        </div>
-                                        
-                                        <div style="display: flex; gap: 10px; margin-top: 20px;">
-                                            <button class="btn btn-primary" onclick="saveToGitHub()">
-                                                <i class="fas fa-cloud-upload-alt"></i> Save to GitHub
-                                            </button>
-                                            <button class="btn btn-success" onclick="loadFromGitHub()">
-                                                <i class="fas fa-cloud-download-alt"></i> Load from GitHub
-                                            </button>
-                                        </div>
-                                        
-                                        <div style="margin-top: 20px;">
-                                            <h4>How to set up:</h4>
-                                            <ol style="text-align: left; margin-left: 20px;">
-                                                <li>Create a new repository on GitHub</li>
-                                                <li>Generate a personal access token with "repo" permissions</li>
-                                                <li>Enter your repository name (username/repo-name)</li>
-                                                <li>Enter your access token</li>
-                                                <li>Click "Save to GitHub" to upload your data</li>
-                                            </ol>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="tab-content" id="settings">
-                                    <h3>Application Settings</h3>
-                                    <div class="form-group">
-                                        <label for="currency">Currency</label>
-                                        <select id="currency" class="form-control">
-                                            <option value="€">Euro (€)</option>
-                                            <option value="$">Dollar ($)</option>
-                                            <option value="£">Pound (£)</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="distance-unit">Distance Unit</label>
-                                        <select id="distance-unit" class="form-control">
-                                            <option value="km">Kilometers</option>
-                                            <option value="mi">Miles</option>
-                                        </select>
-                                    </div>
-                                    <button class="btn btn-primary" onclick="saveSettings()">
-                                        Save Settings
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    // Initialize GitHub config
-                    const githubConfig = JSON.parse(localStorage.getItem('github_config') || {});
-                    if (githubConfig.repo) {
-                        document.getElementById('github-repo').value = githubConfig.repo;
-                    }
-                    if (githubConfig.token) {
-                        document.getElementById('github-token').value = githubConfig.token;
-                    }
-                    if (githubConfig.filename) {
-                        document.getElementById('github-filename').value = githubConfig.filename;
-                    }
-                    break;
-            }
-            
-            // Set active navigation item
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.getAttribute('data-target') === page) {
-                    item.classList.add('active');
-                }
-            });
-        }
-        
         // Navigation
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
                 const target = this.getAttribute('data-target');
-                loadContent(target);
+                
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show active content
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(`${target}-content`).classList.add('active');
+                
+                // Refresh content if needed
+                if (target === 'drivers') {
+                    renderDrivers();
+                } else if (target === 'tenders') {
+                    renderAllTenders();
+                } else if (target === 'payments') {
+                    renderPayments();
+                } else if (target === 'reports') {
+                    updateReports();
+                }
             });
         });
         
         // Tab switching
-        function setupTabSwitching() {
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabName = this.getAttribute('data-tab');
-                    const tabContainer = this.closest('.tabs').nextElementSibling;
-                    
-                    // Update active tab
-                    this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Show active content
-                    tabContainer.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    tabContainer.querySelector(`#${tabName}`).classList.add('active');
-                    
-                    // Update reports when switching tabs
-                    if (this.closest('#reports-content')) {
-                        updateReports();
-                    }
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                const tabContainer = this.closest('.tabs').nextElementSibling;
+                
+                // Update active tab
+                this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show active content
+                tabContainer.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
                 });
+                tabContainer.querySelector(`#${tabName}`).classList.add('active');
+                
+                // Update reports when switching tabs
+                if (this.closest('#reports-content')) {
+                    updateReports();
+                }
             });
-        }
+        });
         
         // Update dashboard
         function updateDashboard() {
@@ -2580,53 +2527,30 @@
         
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            try {
-                // Set current date
-                document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { 
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-                });
-                
-                // Initialize sync status
-                updateSyncStatus('Sync not performed yet', 'sync-pending');
-                
-                // Set default issue date and due date for payments
-                const today = new Date().toISOString().split('T')[0];
-                const nextWeek = new Date();
-                nextWeek.setDate(nextWeek.getDate() + 7);
-                const nextWeekFormatted = nextWeek.toISOString().split('T')[0];
-                
-                document.getElementById('issue_date').value = today;
-                document.getElementById('due_date').value = nextWeekFormatted;
-                
-                // Load settings
-                const settings = JSON.parse(localStorage.getItem('transport_settings') || '{}');
-                if (settings.currency) {
-                    document.getElementById('currency').value = settings.currency;
-                }
-                if (settings.distanceUnit) {
-                    document.getElementById('distance-unit').value = settings.distanceUnit;
-                }
-                
-                // Initialize GitHub config
-                const githubConfig = JSON.parse(localStorage.getItem('github_config') || '{}');
-                if (githubConfig.repo) {
-                    document.getElementById('github-repo').value = githubConfig.repo;
-                }
-                if (githubConfig.token) {
-                    document.getElementById('github-token').value = githubConfig.token;
-                }
-                if (githubConfig.filename) {
-                    document.getElementById('github-filename').value = githubConfig.filename;
-                }
-                
-                // Set up tab switching
-                setupTabSwitching();
-            } catch (error) {
-                console.error('Initialization error:', error);
-                // Reset to defaults if initialization fails
-                localStorage.clear();
-                initDemoData();
-                location.reload();
+            // Set current date
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+            
+            // Initialize sync status
+            updateSyncStatus('Sync not performed yet', 'sync-pending');
+            
+            // Set default issue date and due date for payments
+            const today = new Date().toISOString().split('T')[0];
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            const nextWeekFormatted = nextWeek.toISOString().split('T')[0];
+            
+            document.getElementById('issue_date').value = today;
+            document.getElementById('due_date').value = nextWeekFormatted;
+            
+            // Load settings
+            const settings = JSON.parse(localStorage.getItem('transport_settings') || '{}');
+            if (settings.currency) {
+                document.getElementById('currency').value = settings.currency;
+            }
+            if (settings.distanceUnit) {
+                document.getElementById('distance-unit').value = settings.distanceUnit;
             }
         });
     </script>
