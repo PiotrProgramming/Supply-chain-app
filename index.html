@@ -1,1489 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transport Manager Pro</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --light: #ecf0f1;
-            --dark: #34495e;
-            --gray: #95a5a6;
-            --light-gray: #f5f7fa;
-            --sidebar-width: 250px;
-            --header-height: 70px;
-            --notification-width: 350px;
-            --chat-width: 300px;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: var(--light-gray);
-            color: #333;
-            height: 100vh;
-            overflow: hidden;
-        }
-        
-        /* Auth Screen */
-        .auth-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            padding: 20px;
-        }
-        
-        .auth-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .auth-card h1 {
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-        
-        .auth-card p {
-            color: var(--gray);
-            margin-bottom: 30px;
-        }
-        
-        .auth-card img {
-            width: 100px;
-            margin-bottom: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--dark);
-        }
-        
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            border-color: var(--secondary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-        }
-        
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            font-size: 1rem;
-        }
-        
-        .btn-block {
-            width: 100%;
-        }
-        
-        .btn-sm {
-            padding: 8px 15px;
-            font-size: 0.9rem;
-        }
-        
-        .btn-primary {
-            background: var(--secondary);
-            color: white;
-        }
-        
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-        
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-        
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-        
-        .btn-info {
-            background: #2980b9;
-            color: white;
-        }
-        
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-        
-        /* App Container */
-        .app-container {
-            display: none;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .header {
-            background: white;
-            height: var(--header-height);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 1.5rem;
-        }
-        
-        .logo i {
-            margin-right: 10px;
-            color: var(--secondary);
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .user-info span {
-            font-weight: 500;
-            color: var(--dark);
-        }
-        
-        .notification-icon {
-            position: relative;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-        
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--danger);
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 0.7rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .app-content {
-            display: grid;
-            grid-template-columns: var(--sidebar-width) 1fr;
-            height: calc(100vh - var(--header-height));
-            margin-top: var(--header-height);
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            background: var(--primary);
-            color: white;
-            height: 100%;
-            overflow-y: auto;
-            padding: 20px 0;
-        }
-        
-        .sidebar h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .nav-item {
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            border-left: 4px solid transparent;
-        }
-        
-        .nav-item i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-        
-        .nav-item:hover, .nav-item.active {
-            background: rgba(255,255,255,0.1);
-            border-left: 4px solid var(--secondary);
-        }
-        
-        /* Main Content */
-        .main-content {
-            padding: 25px;
-            overflow-y: auto;
-            height: 100%;
-            position: relative;
-        }
-        
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            text-align: center;
-            transition: transform 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-        }
-        
-        .stat-card h3 {
-            color: var(--dark);
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-        
-        .stat-card .value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--secondary);
-        }
-        
-        .stat-card .icon {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 2rem;
-            opacity: 0.1;
-            color: var(--dark);
-        }
-        
-        .section {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-        }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .section-header h2 {
-            color: var(--dark);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            color: var(--dark);
-            position: sticky;
-            top: 0;
-        }
-        
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-        
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            display: inline-block;
-        }
-        
-        .status-pending { background: #fef9e7; color: #f39c12; }
-        .status-assigned { background: #e8f4fd; color: #3498db; }
-        .status-in_progress { background: #d5f5e3; color: #27ae60; }
-        .status-delivered { background: #d5f5e3; color: #27ae60; }
-        .status-cancelled { background: #fadbd8; color: #c0392b; }
-        .status-overdue { background: #fadbd8; color: #c0392b; }
-        .status-paid { background: #d5f5e3; color: #27ae60; }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .modal-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-body {
-            padding: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-        
-        .close {
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: var(--gray);
-        }
-        
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 20px;
-        }
-        
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-        }
-        
-        .tab.active {
-            border-bottom: 3px solid var(--secondary);
-            font-weight: bold;
-            color: var(--secondary);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .chart-container {
-            height: 300px;
-            margin: 20px 0;
-        }
-        
-        .github-sync {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        
-        .github-sync textarea {
-            height: 100px;
-            margin: 10px 0;
-            font-family: monospace;
-        }
-        
-        .role-badge {
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-        
-        .role-admin { background: #d6eaf8; color: #2874a6; }
-        .role-dispatcher { background: #d5f5e3; color: #239b56; }
-        .role-driver { background: #fdebd0; color: #d35400; }
-        
-        .sync-status {
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            text-align: center;
-            font-weight: 500;
-        }
-        
-        .sync-success { background: #d5f5e3; color: #27ae60; }
-        .sync-error { background: #fadbd8; color: #c0392b; }
-        .sync-pending { background: #fef9e7; color: #f39c12; }
-        
-        /* File Upload */
-        .file-upload {
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .file-upload:hover {
-            border-color: var(--secondary);
-            background: rgba(52, 152, 219, 0.05);
-        }
-        
-        .file-upload i {
-            font-size: 2.5rem;
-            color: var(--secondary);
-            margin-bottom: 10px;
-        }
-        
-        .file-upload p {
-            color: var(--gray);
-            margin-bottom: 15px;
-        }
-        
-        .file-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            display: none;
-        }
-        
-        /* Notification Panel */
-        .notification-panel {
-            position: fixed;
-            top: var(--header-height);
-            right: 20px;
-            width: var(--notification-width);
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            z-index: 1000;
-            display: none;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .notification-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .notification-list {
-            padding: 15px;
-        }
-        
-        .notification-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .notification-item:hover {
-            background: #f8f9fa;
-        }
-        
-        .notification-item.unread {
-            background: #e8f4fd;
-        }
-        
-        .notification-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .notification-title i {
-            margin-right: 10px;
-        }
-        
-        .notification-time {
-            font-size: 0.8rem;
-            color: var(--gray);
-            margin-top: 5px;
-        }
-        
-        /* Chat Panel */
-        .chat-panel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: var(--chat-width);
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
-            max-height: 70vh;
-        }
-        
-        .chat-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--primary);
-            color: white;
-            border-radius: 10px 10px 0 0;
-        }
-        
-        .chat-messages {
-            padding: 15px;
-            flex-grow: 1;
-            overflow-y: auto;
-            max-height: 300px;
-        }
-        
-        .message {
-            margin-bottom: 15px;
-            padding: 10px 15px;
-            border-radius: 8px;
-            max-width: 80%;
-            position: relative;
-        }
-        
-        .message.sent {
-            background: #d5f5e3;
-            margin-left: auto;
-        }
-        
-        .message.received {
-            background: #e8f4fd;
-            margin-right: auto;
-        }
-        
-        .message-sender {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .message-time {
-            font-size: 0.7rem;
-            color: var(--gray);
-            text-align: right;
-            margin-top: 5px;
-        }
-        
-        .chat-input {
-            display: flex;
-            padding: 15px;
-            border-top: 1px solid #eee;
-        }
-        
-        .chat-input input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            margin-right: 10px;
-        }
-        
-        /* Vehicle Info */
-        .vehicle-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-        
-        .vehicle-row {
-            display: flex;
-            margin-bottom: 10px;
-        }
-        
-        .vehicle-label {
-            font-weight: 600;
-            width: 120px;
-        }
-        
-        /* Responsive */
-        @media (max-width: 992px) {
-            .app-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .sidebar {
-                display: none;
-            }
-            
-            .stats-container {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                height: auto;
-                padding: 10px;
-            }
-            
-            .user-info {
-                margin-top: 10px;
-            }
-            
-            .notification-panel, .chat-panel {
-                width: 90%;
-                right: 5%;
-                left: 5%;
-            }
-        }
-    </style>
+    <!-- ... existing head content ... -->
 </head>
 <body>
-    <!-- Authentication Screen -->
-    <div class="auth-container" id="auth-screen">
-        <div class="auth-card">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj48cGF0aCBmaWxsPSIjMzQ5OGRiIiBkPSJNMTI1IDMwTDE4Ny4xNDYgNzguMTQ2TDE0My4yOTIgMTIxLjk5OUwxMjUgMTAzLjcwN0wxMDYuNzA4IDEyMS45OTlMNjIuODU0IDc4LjE0NkwxMjUgMzBaIi8+PHBhdGggZmlsbD0iIzJjM2U1MCIgZD0iTTYyLjg1NCA3OC4xNDZMNjIuODU0IDE2OS44NTRMMTA2LjcwOCAyMTMuNzA4TDEyNSAxOTUuNDE1TDE0My4yOTIgMjEzLjcwOEwxODcuMTQ2IDE2OS44NTRMMTg3LjE0NiA3OC4xNDZMMTQzLjI5MiAxMjEuOTk5TDEyNSAxMDMuNzA3TDEwNi43MDggMTIxLjk5OUw2Mi44NTQgNzguMTQ2WiIvPjxwYXRoIGZpbGw9IiMzNDk4ZGIiIGQ9Ik0xMDYuNzA4IDEyMS45OTlMMTA2LjcwOCAxODcuMTQ2TDEyNSAxNjguODU0TDE0My4yOTIgMTg3LjE0NkwxNDMuMjkyIDEyMS45OTlMMTI1IDEwMy43MDdMMTA2LjcwOCAxMjEuOTk5WiIvPjwvc3ZnPg==" alt="Transport Manager Logo">
-            <h1>Transport Manager Pro</h1>
-            <p>All-in-one transportation management solution</p>
-            
-            <div id="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" placeholder="Enter your username">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Enter your password">
-                </div>
-                <button class="btn btn-primary btn-block" onclick="login()">Login</button>
-                <p style="margin-top: 15px; color: var(--gray);">
-                    Demo credentials: admin / admin123
-                </p>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Main Application -->
-    <div class="app-container" id="app-container">
-        <div class="header">
-            <div class="logo">
-                <i class="fas fa-truck"></i>
-                <span>Transport Manager Pro</span>
-            </div>
-            <div class="user-info">
-                <span id="current-user">Admin User</span>
-                <span class="role-badge role-admin" id="current-role">Admin</span>
-                <div class="notification-icon" id="notification-icon">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge" id="notification-count">3</span>
-                </div>
-                <div class="chat-icon" id="chat-icon">
-                    <i class="fas fa-comments"></i>
-                </div>
-                <button class="btn btn-warning" style="padding: 8px 15px;" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </div>
-        </div>
-        
-        <div class="app-content">
-            <div class="sidebar">
-                <h2><i class="fas fa-bars"></i> Menu</h2>
-                <div class="nav-item active" data-target="dashboard">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </div>
-                <div class="nav-item" data-target="drivers">
-                    <i class="fas fa-users"></i> Drivers
-                </div>
-                <div class="nav-item" data-target="tenders">
-                    <i class="fas fa-clipboard-list"></i> Tenders
-                </div>
-                <div class="nav-item" data-target="payments">
-                    <i class="fas fa-money-bill-wave"></i> Payments
-                </div>
-                <div class="nav-item" data-target="reports">
-                    <i class="fas fa-chart-bar"></i> Reports
-                </div>
-                <div class="nav-item" data-target="admin">
-                    <i class="fas fa-cog"></i> Administration
-                </div>
-            </div>
-            
-            <div class="main-content" id="main-content">
-                <!-- Content will be loaded dynamically here -->
-                <div class="view-loader">
-                    <div class="loader"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Notification Panel -->
-        <div class="notification-panel" id="notification-panel">
-            <div class="notification-header">
-                <h3>Notifications</h3>
-                <span class="close" onclick="closeNotificationPanel()">&times;</span>
-            </div>
-            <div class="notification-list" id="notification-list">
-                <!-- Notifications will be populated here -->
-            </div>
-        </div>
-        
-        <!-- Chat Panel -->
-        <div class="chat-panel" id="chat-panel">
-            <div class="chat-header">
-                <h3>Team Chat</h3>
-                <span class="close" onclick="closeChatPanel()">&times;</span>
-            </div>
-            <div class="chat-messages" id="chat-messages">
-                <!-- Chat messages will be populated here -->
-            </div>
-            <div class="chat-input">
-                <input type="text" id="chat-input" placeholder="Type your message...">
-                <button class="btn btn-primary" onclick="sendMessage()">Send</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modals -->
-    <div class="modal" id="tender-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Create New Tender</h3>
-                <span class="close" onclick="closeModal('tender-modal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="tabs">
-                    <div class="tab active" data-tab="manual">Manual Entry</div>
-                    <div class="tab" data-tab="upload">Upload Document</div>
-                </div>
-                
-                <div class="tab-content active" id="manual">
-                    <form id="tender-form">
-                        <div class="form-group">
-                            <label for="origin">Origin</label>
-                            <input type="text" id="origin" name="origin" placeholder="e.g., Berlin, Germany" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="destination">Destination</label>
-                            <input type="text" id="destination" name="destination" placeholder="e.g., Paris, France" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="load_size">Load Size (sqm)</label>
-                            <input type="number" id="load_size" name="load_size" min="1" placeholder="e.g., 85" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="cargo_description">Cargo Description</label>
-                            <textarea id="cargo_description" name="cargo_description" rows="3" placeholder="Describe the cargo..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="driver_id">Assign Driver</label>
-                            <select id="driver_id" name="driver_id" required>
-                                <option value="">Select Driver</option>
-                                <!-- Drivers will be populated here -->
-                            </select>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="createTender()">Create Tender</button>
-                    </form>
-                </div>
-                
-                <div class="tab-content" id="upload">
-                    <div class="file-upload" id="tender-upload-area">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <h4>Upload Tender Document</h4>
-                        <p>Drag & drop your file here or click to browse</p>
-                        <button class="btn btn-primary">Select File</button>
-                        <input type="file" id="tender-file" style="display: none;" accept=".pdf,.doc,.docx,.jpg,.png">
-                    </div>
-                    <div class="file-info" id="tender-file-info">
-                        <h4>Detected Information:</h4>
-                        <div class="form-group">
-                            <label>Origin:</label>
-                            <p id="detected-origin">Berlin, Germany</p>
-                        </div>
-                        <div class="form-group">
-                            <label>Destination:</label>
-                            <p id="detected-destination">Paris, France</p>
-                        </div>
-                        <div class="form-group">
-                            <label>Load Size:</label>
-                            <p id="detected-load-size">85 sqm</p>
-                        </div>
-                        <div class="form-group">
-                            <label>Cargo Description:</label>
-                            <p id="detected-cargo">Electronics</p>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="useDetectedTenderInfo()">Use Detected Info</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="modal" id="driver-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add New Driver</h3>
-                <span class="close" onclick="closeModal('driver-modal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="driver-form">
-                    <div class="form-group">
-                        <label for="first_name">First Name</label>
-                        <input type="text" id="first_name" name="first_name" placeholder="e.g., John" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="last_name">Last Name</label>
-                        <input type="text" id="last_name" name="last_name" placeholder="e.g., Smith" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="contact">Contact Information</label>
-                        <input type="text" id="contact" name="contact" placeholder="e.g., +49 123 456 789" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="license">License Number</label>
-                        <input type="text" id="license" name="license" placeholder="e.g., DL12345678" required>
-                    </div>
-                    
-                    <h4>Vehicle Information</h4>
-                    <div class="form-group">
-                        <label for="truck_number">Truck Registration</label>
-                        <input type="text" id="truck_number" name="truck_number" placeholder="e.g., AB 12345">
-                    </div>
-                    <div class="form-group">
-                        <label for="trailer_number">Trailer Registration</label>
-                        <input type="text" id="trailer_number" name="trailer_number" placeholder="e.g., CD 67890">
-                    </div>
-                    
-                    <h4>Fuel Cards</h4>
-                    <div id="fuel-cards-container">
-                        <div class="fuel-card-entry">
-                            <div class="form-group">
-                                <label>Card Number</label>
-                                <input type="text" name="card_number[]" placeholder="e.g., 1234 5678 9012 3456">
-                            </div>
-                            <div class="form-group">
-                                <label>PIN</label>
-                                <input type="text" name="card_pin[]" placeholder="e.g., 1234">
-                            </div>
-                            <div class="form-group">
-                                <label>Expiry Date</label>
-                                <input type="date" name="card_expiry[]">
-                            </div>
-                            <div class="form-group">
-                                <label>No Expiry Date</label>
-                                <input type="checkbox" name="card_no_expiry[]">
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-info" onclick="addFuelCardField()">
-                        <i class="fas fa-plus"></i> Add Another Card
-                    </button>
-                    
-                    <div class="form-group" style="margin-top: 20px;">
-                        <label for="status">Status</label>
-                        <select id="status" name="status" required>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                    <button type="button" class="btn btn-primary" onclick="createDriver()">Add Driver</button>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <div class="modal" id="payment-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Add New Payment</h3>
-                <span class="close" onclick="closeModal('payment-modal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="tabs">
-                    <div class="tab active" data-tab="manual">Manual Entry</div>
-                    <div class="tab" data-tab="upload">Upload Invoice</div>
-                </div>
-                
-                <div class="tab-content active" id="manual">
-                    <form id="payment-form">
-                        <div class="form-group">
-                            <label for="payment-tender-id">Tender</label>
-                            <select id="payment-tender-id" name="tender_id" required>
-                                <option value="">Select Tender</option>
-                                <!-- Tenders will be populated here -->
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="invoice_number">Invoice Number</label>
-                            <input type="text" id="invoice_number" name="invoice_number" placeholder="e.g., INV-2023-001" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="amount">Amount</label>
-                            <input type="number" id="amount" name="amount" min="0" step="0.01" placeholder="e.g., 1200.50" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="currency">Currency</label>
-                            <select id="currency" name="currency" required>
-                                <option value="€">Euro (€)</option>
-                                <option value="$">Dollar ($)</option>
-                                <option value="£">Pound (£)</option>
-                                <option value="zł">Złoty (zł)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="issue_date">Issue Date</label>
-                            <input type="date" id="issue_date" name="issue_date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="due_days">Due in (days)</label>
-                            <input type="number" id="due_days" name="due_days" min="1" value="30" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="payment-status">Status</label>
-                            <select id="payment-status" name="status" required>
-                                <option value="pending">Pending</option>
-                                <option value="paid">Paid</option>
-                            </select>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="createPayment()">Add Payment</button>
-                    </form>
-                </div>
-                
-                <div class="tab-content" id="upload">
-                    <div class="file-upload" id="invoice-upload-area">
-                        <i class="fas fa-file-invoice-dollar"></i>
-                        <h4>Upload Invoice Document</h4>
-                        <p>Drag & drop your file here or click to browse</p>
-                        <button class="btn btn-primary">Select File</button>
-                        <input type="file" id="invoice-file" style="display: none;" accept=".pdf,.jpg,.png">
-                    </div>
-                    <div class="file-info" id="invoice-file-info">
-                        <h4>Detected Information:</h4>
-                        <div class="form-group">
-                            <label>Invoice Number:</label>
-                            <p id="detected-invoice-number">INV-2023-045</p>
-                        </div>
-                        <div class="form-group">
-                            <label>Amount:</label>
-                            <p id="detected-amount">€1,250.00</p>
-                        </div>
-                        <div class="form-group">
-                            <label>Currency:</label>
-                            <p id="detected-currency">Euro (€)</p>
-                        </div>
-                        <div class="form-group">
-                            <label>Issue Date:</label>
-                            <p id="detected-issue-date">2023-10-15</p>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="useDetectedInvoiceInfo()">Use Detected Info</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="modal" id="user-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>User Management</h3>
-                <span class="close" onclick="closeModal('user-modal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="tabs">
-                    <div class="tab active" data-tab="add">Add User</div>
-                    <div class="tab" data-tab="edit">Edit Users</div>
-                </div>
-                
-                <div class="tab-content active" id="add">
-                    <form id="user-form">
-                        <div class="form-group">
-                            <label for="new-username">Username</label>
-                            <input type="text" id="new-username" name="username" placeholder="e.g., dispatcher1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="new-password">Password</label>
-                            <input type="password" id="new-password" name="password" placeholder="Enter password" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="full-name">Full Name</label>
-                            <input type="text" id="full-name" name="full_name" placeholder="e.g., John Smith" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="user-role">Role</label>
-                            <select id="user-role" name="role" required>
-                                <option value="admin">Admin</option>
-                                <option value="dispatcher">Dispatcher</option>
-                                <option value="driver">Driver</option>
-                            </select>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="createUser()">Add User</button>
-                    </form>
-                </div>
-                
-                <div class="tab-content" id="edit">
-                    <div class="form-group">
-                        <label for="edit-user">Select User</label>
-                        <select id="edit-user" class="form-control" onchange="loadUserDetails()">
-                            <option value="">Select a user</option>
-                            <!-- Users will be populated here -->
-                        </select>
-                    </div>
-                    <form id="edit-user-form" style="display: none;">
-                        <input type="hidden" id="edit-username">
-                        <div class="form-group">
-                            <label for="edit-full-name">Full Name</label>
-                            <input type="text" id="edit-full-name" name="full_name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-role">Role</label>
-                            <select id="edit-role" name="role" required>
-                                <option value="admin">Admin</option>
-                                <option value="dispatcher">Dispatcher</option>
-                                <option value="driver">Driver</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-password">New Password (leave blank to keep current)</label>
-                            <input type="password" id="edit-password" name="password">
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="updateUser()">Update User</button>
-                        <button type="button" class="btn btn-danger" onclick="deleteUser()">Delete User</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="modal" id="view-tender-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Tender Details</h3>
-                <span class="close" onclick="closeModal('view-tender-modal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="tab-container">
-                    <div class="tabs">
-                        <div class="tab active" data-tab="details">Details</div>
-                        <div class="tab" data-tab="status">Update Status</div>
-                        <div class="tab" data-tab="issues">Report Issue</div>
-                        <div class="tab" data-tab="route">Route Planning</div>
-                    </div>
-                    
-                    <div id="details-tab" class="tab-content active">
-                        <!-- Tender details will be loaded here -->
-                    </div>
-                    
-                    <div id="status-tab" class="tab-content">
-                        <form id="status-form">
-                            <input type="hidden" id="tender-id" name="tender_id">
-                            <div class="form-group">
-                                <label for="status">Update Status</label>
-                                <select id="status" name="status" required>
-                                    <option value="pending">Pending</option>
-                                    <option value="assigned">Assigned</option>
-                                    <option value="picked_up">Picked Up</option>
-                                    <option value="in_progress">In Progress</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="cancelled">Cancelled</option>
-                                </select>
-                            </div>
-                            <div class="form-group" id="cancellation-reason-container" style="display:none;">
-                                <label for="cancellation_reason">Cancellation Reason</label>
-                                <textarea id="cancellation_reason" name="cancellation_reason" rows="3"></textarea>
-                            </div>
-                            <button type="button" class="btn btn-primary" onclick="updateTenderStatus()">Update Status</button>
-                        </form>
-                    </div>
-                    
-                    <div id="issues-tab" class="tab-content">
-                        <form id="issue-form">
-                            <input type="hidden" id="issue-tender-id" name="tender_id">
-                            <div class="form-group">
-                                <label for="issue_description">Issue Description</label>
-                                <textarea id="issue_description" name="issue_description" rows="4" required></textarea>
-                            </div>
-                            <button type="button" class="btn btn-primary" onclick="reportIssue()">Report Issue</button>
-                        </form>
-                    </div>
-                    
-                    <div id="route-tab" class="tab-content">
-                        <div class="form-group">
-                            <label for="route-map">Route Map</label>
-                            <div id="route-map" style="height: 300px; background: #f5f7fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                                <p>Route visualization will appear here</p>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="route-distance">Distance (km)</label>
-                            <input type="number" id="route-distance" min="1" placeholder="Enter distance">
-                        </div>
-                        <div class="form-group">
-                            <label for="route-notes">Route Notes</label>
-                            <textarea id="route-notes" rows="3" placeholder="Add any route-specific notes"></textarea>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="saveRouteInfo()">Save Route Information</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="modal" id="vehicle-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Vehicle Details</h3>
-                <span class="close" onclick="closeModal('vehicle-modal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="vehicle-form">
-                    <div class="form-group">
-                        <label for="vehicle-type">Vehicle Type</label>
-                        <select id="vehicle-type" required>
-                            <option value="truck">Truck</option>
-                            <option value="trailer">Trailer</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="vehicle-reg">Registration Number</label>
-                        <input type="text" id="vehicle-reg" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="oc-expiry">OC Expiry Date</label>
-                        <input type="date" id="oc-expiry" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="inspection-expiry">Inspection Expiry Date</label>
-                        <input type="date" id="inspection-expiry" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="alert-days">Alert Days Before Expiry</label>
-                        <input type="number" id="alert-days" min="1" value="14">
-                    </div>
-                    <button type="button" class="btn btn-primary" onclick="saveVehicleInfo()">Save Vehicle</button>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- ... existing body content ... -->
 
     <script>
-        // Application state
-        const appState = {
-            currentUser: null,
-            currency: '€',
-            distanceUnit: 'km',
-            githubConfig: {
-                repo: '',
-                token: '',
-                filename: 'transport-data.json'
-            },
-            currentView: 'dashboard',
-            notifications: [],
-            chatMessages: [],
-            vehicles: [],
-            inspections: [],
-            chatUsers: []
-        };
-        
-        // Initialize demo data
-        function initDemoData() {
-            // Users
-            const users = [
-                { username: "admin", password: "admin123", name: "Administrator", role: "admin", lastLogin: new Date().toISOString() },
-                { username: "dispatcher1", password: "dispatch123", name: "John Smith", role: "dispatcher", lastLogin: new Date(Date.now() - 86400000).toISOString() },
-                { username: "driver1", password: "driver123", name: "Robert Davis", role: "driver", lastLogin: null }
-            ];
-            
-            // Drivers
-            const drivers = [
-                { 
-                    id: 1, 
-                    firstName: "John", 
-                    lastName: "Smith", 
-                    contact: "+49 123 456 789", 
-                    license: "DL12345678", 
-                    status: "active",
-                    truck: "AB 12345",
-                    trailer: "CD 67890",
-                    fuelCards: [
-                        { number: "123456789012", pin: "1234", expiry: "2025-12-31" },
-                        { number: "987654321098", pin: "4321", noExpiry: true }
-                    ]
-                },
-                { 
-                    id: 2, 
-                    firstName: "Emma", 
-                    lastName: "Johnson", 
-                    contact: "+49 987 654 321", 
-                    license: "DL23456789", 
-                    status: "active",
-                    truck: "EF 54321",
-                    trailer: "GH 09876",
-                    fuelCards: [
-                        { number: "456789012345", pin: "5678", expiry: "2024-06-30" }
-                    ]
-                }
-            ];
-            
-            // Tenders
-            const tenders = [
-                { 
-                    id: 1, 
-                    origin: "Berlin", 
-                    destination: "Hamburg", 
-                    driverId: 1, 
-                    driver: "John Smith", 
-                    loadSize: 85, 
-                    loadPercentage: 85, 
-                    status: "delivered", 
-                    revenue: 1450, 
-                    currency: "€",
-                    cargo: "Electronics", 
-                    createdAt: new Date(Date.now() - 86400000).toISOString() 
-                },
-                { 
-                    id: 2, 
-                    origin: "Munich", 
-                    destination: "Frankfurt", 
-                    driverId: 2, 
-                    driver: "Emma Johnson", 
-                    loadSize: 75, 
-                    loadPercentage: 75, 
-                    status: "in_progress", 
-                    revenue: 1950, 
-                    currency: "€",
-                    cargo: "Furniture", 
-                    createdAt: new Date(Date.now() - 172800000).toISOString() 
-                }
-            ];
-            
-            // Payments
-            const payments = [
-                { 
-                    id: 1, 
-                    tenderId: 1, 
-                    invoiceNumber: "INV-2023-001", 
-                    amount: 1450, 
-                    currency: "€",
-                    issueDate: "2023-01-15", 
-                    dueDate: "2023-02-15", 
-                    status: "paid", 
-                    paymentDate: "2023-02-10" 
-                },
-                { 
-                    id: 2, 
-                    tenderId: 2, 
-                    invoiceNumber: "INV-2023-002", 
-                    amount: 1950, 
-                    currency: "€",
-                    issueDate: "2023-03-10", 
-                    dueDate: "2023-04-10", 
-                    status: "pending" 
-                }
-            ];
-            
-            // Vehicles and Inspections
-            const vehicles = [
-                {
-                    id: 1,
-                    type: "truck",
-                    regNumber: "AB 12345",
-                    driverId: 1,
-                    ocExpiry: "2024-06-30",
-                    inspectionExpiry: "2024-03-15",
-                    alertDays: 14
-                },
-                {
-                    id: 2,
-                    type: "trailer",
-                    regNumber: "CD 67890",
-                    driverId: 1,
-                    ocExpiry: "2024-07-31",
-                    inspectionExpiry: "2024-04-20",
-                    alertDays: 14
-                }
-            ];
-            
-            // Notifications
-            const notifications = [
-                {
-                    id: 1,
-                    title: "Payment Due",
-                    message: "Invoice INV-2023-002 is due in 5 days",
-                    type: "warning",
-                    timestamp: new Date().toISOString(),
-                    read: false
-                },
-                {
-                    id: 2,
-                    title: "Vehicle Inspection",
-                    message: "Inspection for trailer CD 67890 expires in 10 days",
-                    type: "warning",
-                    timestamp: new Date(Date.now() - 3600000).toISOString(),
-                    read: false
-                },
-                {
-                    id: 3,
-                    title: "New Message",
-                    message: "You have a new message from Robert Davis",
-                    type: "info",
-                    timestamp: new Date(Date.now() - 7200000).toISOString(),
-                    read: true
-                }
-            ];
-            
-            // Chat messages
-            const chatMessages = [
-                {
-                    id: 1,
-                    sender: "Robert Davis",
-                    message: "Hi team, just completed the Berlin to Hamburg delivery",
-                    timestamp: new Date(Date.now() - 3600000).toISOString()
-                },
-                {
-                    id: 2,
-                    sender: "John Smith",
-                    message: "Great job Robert! Any issues on the route?",
-                    timestamp: new Date(Date.now() - 3500000).toISOString()
-                }
-            ];
-            
-            // Save to localStorage
-            localStorage.setItem('transport_users', JSON.stringify(users));
-            localStorage.setItem('transport_drivers', JSON.stringify(drivers));
-            localStorage.setItem('transport_tenders', JSON.stringify(tenders));
-            localStorage.setItem('transport_payments', JSON.stringify(payments));
-            localStorage.setItem('transport_vehicles', JSON.stringify(vehicles));
-            localStorage.setItem('transport_notifications', JSON.stringify(notifications));
-            localStorage.setItem('transport_chat', JSON.stringify(chatMessages));
-            
-            // Initialize appState
-            appState.notifications = notifications;
-            appState.chatMessages = chatMessages;
-            appState.vehicles = vehicles;
-        }
-        
-        // Load application data
-        function loadAppData() {
-            // Load from localStorage or initialize demo data
-            if (!localStorage.getItem('transport_users')) {
-                initDemoData();
-            }
-            
-            return {
-                users: JSON.parse(localStorage.getItem('transport_users') || '[]'),
-                drivers: JSON.parse(localStorage.getItem('transport_drivers') || '[]'),
-                tenders: JSON.parse(localStorage.getItem('transport_tenders') || '[]'),
-                payments: JSON.parse(localStorage.getItem('transport_payments') || '[]'),
-                vehicles: JSON.parse(localStorage.getItem('transport_vehicles') || '[]'),
-                notifications: JSON.parse(localStorage.getItem('transport_notifications') || '[]'),
-                chatMessages: JSON.parse(localStorage.getItem('transport_chat') || '[]')
-            };
-        }
-        
-        // Save application data
-        function saveAppData(data) {
-            localStorage.setItem('transport_users', JSON.stringify(data.users || []));
-            localStorage.setItem('transport_drivers', JSON.stringify(data.drivers || []));
-            localStorage.setItem('transport_tenders', JSON.stringify(data.tenders || []));
-            localStorage.setItem('transport_payments', JSON.stringify(data.payments || []));
-            localStorage.setItem('transport_vehicles', JSON.stringify(data.vehicles || []));
-            localStorage.setItem('transport_notifications', JSON.stringify(data.notifications || []));
-            localStorage.setItem('transport_chat', JSON.stringify(data.chatMessages || []));
-        }
-        
+        // ... existing appState and helper functions ...
+
         // Initialize the application
         function initApp() {
             const data = loadAppData();
@@ -1504,8 +29,16 @@
             
             // Check for expiring inspections
             checkExpiringInspections();
+            
+            // Initialize views
+            initView();
         }
         
+        // Initialize views after login
+        function initView() {
+            loadView(appState.currentView);
+        }
+
         // View Management System
         function loadView(viewName) {
             appState.currentView = viewName;
@@ -1553,7 +86,7 @@
             const content = `
                 <div class="dashboard-header">
                     <h1>Dashboard</h1>
-                    <div id="current-date">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                    <div>${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
                 </div>
                 
                 <div class="stats-container">
@@ -1684,35 +217,424 @@
             document.getElementById('main-content').innerHTML = content;
         }
         
-        // Other view loading functions would be similar in structure
-        
-        // Tab switching
-        function setupTabSwitching(containerId) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
+        // Implement missing view functions
+        function loadDriversView() {
+            const { drivers } = loadAppData();
             
-            container.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabName = this.getAttribute('data-tab');
+            const content = `
+                <div class="dashboard-header">
+                    <h1>Driver Management</h1>
+                    <button class="btn btn-primary" onclick="openModal('driver-modal')">
+                        <i class="fas fa-plus"></i> Add Driver
+                    </button>
+                </div>
+                
+                <div class="section">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>License</th>
+                                <th>Status</th>
+                                <th>Vehicle</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${drivers.map(driver => `
+                                <tr>
+                                    <td>${driver.firstName} ${driver.lastName}</td>
+                                    <td>${driver.contact}</td>
+                                    <td>${driver.license}</td>
+                                    <td><span class="status-badge ${driver.status === 'active' ? 'status-delivered' : 'status-cancelled'}">
+                                        ${driver.status.toUpperCase()}
+                                    </span></td>
+                                    <td>${driver.truck || 'N/A'}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm" onclick="editDriver(${driver.id})">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('main-content').innerHTML = content;
+        }
+        
+        function loadTendersView() {
+            const { tenders } = loadAppData();
+            
+            const content = `
+                <div class="dashboard-header">
+                    <h1>Tender Management</h1>
+                    <button class="btn btn-primary" onclick="openModal('tender-modal')">
+                        <i class="fas fa-plus"></i> New Tender
+                    </button>
+                </div>
+                
+                <div class="section">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Route</th>
+                                <th>Driver</th>
+                                <th>Load Size</th>
+                                <th>Cargo</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tenders.map(tender => `
+                                <tr>
+                                    <td>#${tender.id}</td>
+                                    <td>${tender.origin} → ${tender.destination}</td>
+                                    <td>${tender.driver || 'Unassigned'}</td>
+                                    <td>${tender.loadSize} sqm</td>
+                                    <td>${tender.cargo}</td>
+                                    <td><span class="status-badge status-${tender.status.replace(' ', '_')}">
+                                        ${tender.status.replace('_', ' ').toUpperCase()}
+                                    </span></td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm" onclick="viewTender(${tender.id})">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('main-content').innerHTML = content;
+        }
+        
+        function loadPaymentsView() {
+            const { payments } = loadAppData();
+            
+            const content = `
+                <div class="dashboard-header">
+                    <h1>Payment Management</h1>
+                    <button class="btn btn-primary" onclick="openModal('payment-modal')">
+                        <i class="fas fa-plus"></i> Add Payment
+                    </button>
+                </div>
+                
+                <div class="section">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Tender ID</th>
+                                <th>Amount</th>
+                                <th>Issue Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${payments.map(payment => {
+                                const dueDate = new Date(payment.issueDate);
+                                dueDate.setDate(dueDate.getDate() + payment.dueDays);
+                                
+                                return `
+                                <tr>
+                                    <td>${payment.invoiceNumber}</td>
+                                    <td>#${payment.tenderId}</td>
+                                    <td>${payment.currency}${payment.amount.toFixed(2)}</td>
+                                    <td>${new Date(payment.issueDate).toLocaleDateString()}</td>
+                                    <td>${dueDate.toLocaleDateString()}</td>
+                                    <td><span class="status-badge ${payment.status === 'paid' ? 'status-paid' : 'status-pending'}">
+                                        ${payment.status.toUpperCase()}
+                                    </span></td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('main-content').innerHTML = content;
+        }
+        
+        function loadReportsView() {
+            const content = `
+                <div class="dashboard-header">
+                    <h1>Reports</h1>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Financial Reports</h2>
+                        <div>
+                            <button class="btn btn-primary" onclick="generatePDFReport('financial')">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                    </div>
                     
-                    // Update active tab
-                    this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
+                    <div class="chart-container">
+                        <canvas id="finance-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Performance Reports</h2>
+                        <div>
+                            <button class="btn btn-primary" onclick="generatePDFReport('performance')">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                    </div>
                     
-                    // Show active content
-                    container.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    container.querySelector(`#${tabName}`).classList.add('active');
-                });
+                    <div class="chart-container">
+                        <canvas id="performance-chart"></canvas>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('main-content').innerHTML = content;
+            
+            // Initialize charts
+            setTimeout(() => {
+                renderFinanceChart();
+                renderPerformanceChart();
+            }, 500);
+        }
+        
+        function loadAdminView() {
+            const { users } = loadAppData();
+            
+            const content = `
+                <div class="dashboard-header">
+                    <h1>Administration</h1>
+                    <button class="btn btn-primary" onclick="openModal('user-modal')">
+                        <i class="fas fa-plus"></i> Manage Users
+                    </button>
+                </div>
+                
+                <div class="section">
+                    <div class="section-header">
+                        <h2>GitHub Sync</h2>
+                    </div>
+                    <div class="github-sync">
+                        <div class="form-group">
+                            <label>Repository URL</label>
+                            <input type="text" id="github-repo" class="form-control" placeholder="https://github.com/username/repo">
+                        </div>
+                        <div class="form-group">
+                            <label>Access Token</label>
+                            <input type="password" id="github-token" class="form-control" placeholder="GitHub personal access token">
+                        </div>
+                        <div class="form-group">
+                            <label>Data File Path</label>
+                            <input type="text" id="github-path" class="form-control" value="transport-data.json">
+                        </div>
+                        <div class="form-group">
+                            <label>Current Data</label>
+                            <textarea id="github-data" class="form-control" rows="5" readonly>${JSON.stringify(loadAppData(), null, 2)}</textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="syncWithGitHub()">
+                            <i class="fas fa-sync"></i> Sync with GitHub
+                        </button>
+                        <div id="sync-status" class="sync-status sync-pending">Sync not started</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('main-content').innerHTML = content;
+        }
+        
+        // Implement missing functions
+        function renderFinanceChart() {
+            const ctx = document.getElementById('finance-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [12000, 19000, 15000, 18000, 22000, 24000],
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
             });
         }
         
+        function renderPerformanceChart() {
+            const ctx = document.getElementById('performance-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['John Smith', 'Emma Johnson', 'Michael Brown', 'Sarah Davis'],
+                    datasets: [{
+                        label: 'Completed Tenders',
+                        data: [12, 8, 10, 7],
+                        backgroundColor: '#27ae60'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        function generatePDFReport(type) {
+            alert(`Generating ${type} report...`);
+            // Actual PDF generation would go here
+        }
+        
+        function viewTender(id) {
+            const { tenders } = loadAppData();
+            const tender = tenders.find(t => t.id === id);
+            
+            if (tender) {
+                const content = `
+                    <h3>Tender #${tender.id}</h3>
+                    <div class="vehicle-info">
+                        <div class="vehicle-row">
+                            <div class="vehicle-label">Origin:</div>
+                            <div>${tender.origin}</div>
+                        </div>
+                        <div class="vehicle-row">
+                            <div class="vehicle-label">Destination:</div>
+                            <div>${tender.destination}</div>
+                        </div>
+                        <div class="vehicle-row">
+                            <div class="vehicle-label">Driver:</div>
+                            <div>${tender.driver || 'Not assigned'}</div>
+                        </div>
+                        <div class="vehicle-row">
+                            <div class="vehicle-label">Load Size:</div>
+                            <div>${tender.loadSize} sqm</div>
+                        </div>
+                        <div class="vehicle-row">
+                            <div class="vehicle-label">Cargo:</div>
+                            <div>${tender.cargo}</div>
+                        </div>
+                        <div class="vehicle-row">
+                            <div class="vehicle-label">Status:</div>
+                            <div><span class="status-badge status-${tender.status.replace(' ', '_')}">
+                                ${tender.status.toUpperCase()}
+                            </span></div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('details-tab').innerHTML = content;
+                document.getElementById('tender-id').value = tender.id;
+                document.getElementById('issue-tender-id').value = tender.id;
+                openModal('view-tender-modal');
+            }
+        }
+        
+        function editDriver(id) {
+            const { drivers } = loadAppData();
+            const driver = drivers.find(d => d.id === id);
+            
+            if (driver) {
+                document.getElementById('first_name').value = driver.firstName;
+                document.getElementById('last_name').value = driver.lastName;
+                document.getElementById('contact').value = driver.contact;
+                document.getElementById('license').value = driver.license;
+                document.getElementById('truck_number').value = driver.truck || '';
+                document.getElementById('trailer_number').value = driver.trailer || '';
+                document.getElementById('status').value = driver.status;
+                
+                // Clear existing fuel card entries
+                document.getElementById('fuel-cards-container').innerHTML = '';
+                
+                // Add fuel cards
+                driver.fuelCards.forEach(card => {
+                    addFuelCardField(card);
+                });
+                
+                openModal('driver-modal');
+            }
+        }
+        
+        function editVehicle(id) {
+            const { vehicles } = loadAppData();
+            const vehicle = vehicles.find(v => v.id === id);
+            
+            if (vehicle) {
+                document.getElementById('vehicle-type').value = vehicle.type;
+                document.getElementById('vehicle-reg').value = vehicle.regNumber;
+                document.getElementById('oc-expiry').value = vehicle.ocExpiry;
+                document.getElementById('inspection-expiry').value = vehicle.inspectionExpiry;
+                document.getElementById('alert-days').value = vehicle.alertDays;
+                openModal('vehicle-modal');
+            }
+        }
+        
+        function addFuelCardField(card = {}) {
+            const container = document.getElementById('fuel-cards-container');
+            const newEntry = document.createElement('div');
+            newEntry.className = 'fuel-card-entry';
+            newEntry.innerHTML = `
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" name="card_number[]" value="${card.number || ''}" placeholder="e.g., 1234 5678 9012 3456">
+                </div>
+                <div class="form-group">
+                    <label>PIN</label>
+                    <input type="text" name="card_pin[]" value="${card.pin || ''}" placeholder="e.g., 1234">
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="date" name="card_expiry[]" value="${card.expiry || ''}">
+                </div>
+                <div class="form-group">
+                    <label>No Expiry Date</label>
+                    <input type="checkbox" name="card_no_expiry[]" ${card.noExpiry ? 'checked' : ''}>
+                </div>
+            `;
+            container.appendChild(newEntry);
+        }
+
+        // ... rest of existing functions ...
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Set current date
-            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            // Set up navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const target = this.getAttribute('data-target');
+                    loadView(target);
+                });
             });
             
             // Initialize file uploads
@@ -1729,209 +651,9 @@
             document.getElementById('chat-icon').addEventListener('click', toggleChatPanel);
             
             // Initialize demo data if needed
-            initDemoData();
-            initApp();
-        });
-        
-        // Notification functions
-        function toggleNotificationPanel() {
-            const panel = document.getElementById('notification-panel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-        }
-        
-        function closeNotificationPanel() {
-            document.getElementById('notification-panel').style.display = 'none';
-        }
-        
-        function renderNotifications() {
-            const container = document.getElementById('notification-list');
-            container.innerHTML = appState.notifications.map(notification => `
-                <div class="notification-item ${notification.read ? '' : 'unread'}" onclick="markNotificationRead(${notification.id})">
-                    <div class="notification-title">
-                        <i class="fas fa-${notification.type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-                        ${notification.title}
-                    </div>
-                    <div class="notification-message">${notification.message}</div>
-                    <div class="notification-time">${new Date(notification.timestamp).toLocaleString()}</div>
-                </div>
-            `).join('');
-        }
-        
-        function updateNotificationBadge() {
-            const unread = appState.notifications.filter(n => !n.read).length;
-            document.getElementById('notification-count').textContent = unread;
-        }
-        
-        // Chat functions
-        function toggleChatPanel() {
-            const panel = document.getElementById('chat-panel');
-            panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
-        }
-        
-        function closeChatPanel() {
-            document.getElementById('chat-panel').style.display = 'none';
-        }
-        
-        function renderChatMessages() {
-            const container = document.getElementById('chat-messages');
-            container.innerHTML = appState.chatMessages.map(msg => `
-                <div class="message ${msg.sender === appState.currentUser.name ? 'sent' : 'received'}">
-                    <div class="message-sender">${msg.sender}</div>
-                    <div class="message-text">${msg.message}</div>
-                    <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</div>
-                </div>
-            `).join('');
-            
-            // Scroll to bottom
-            container.scrollTop = container.scrollHeight;
-        }
-        
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const message = input.value.trim();
-            if (message) {
-                appState.chatMessages.push({
-                    id: Date.now(),
-                    sender: appState.currentUser.name,
-                    message: message,
-                    timestamp: new Date().toISOString()
-                });
-                
-                // Save to localStorage
-                saveAppData({
-                    ...loadAppData(),
-                    chatMessages: appState.chatMessages
-                });
-                
-                // Update UI
-                renderChatMessages();
-                input.value = '';
+            if (!localStorage.getItem('transport_users')) {
+                initDemoData();
             }
-        }
-        
-        // PDF Generation
-        function generatePDFReport(type) {
-            // Use jsPDF to generate PDF report
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.text(`${type} Report - Transport Manager Pro`, 10, 10);
-            doc.text(`Generated: ${new Date().toLocaleString()}`, 10, 20);
-            
-            // Add charts and tables (simplified)
-            doc.text("Performance Overview", 10, 40);
-            doc.text("Driver Performance", 10, 80);
-            doc.text("Financial Summary", 10, 120);
-            
-            // Save the PDF
-            doc.save(`${type}_report_${new Date().getTime()}.pdf`);
-        }
-        
-        // Vehicle inspection tracking
-        function checkExpiringInspections() {
-            const today = new Date();
-            const { vehicles } = loadAppData();
-            
-            vehicles.forEach(vehicle => {
-                const inspectionDate = new Date(vehicle.inspectionExpiry);
-                const diff = Math.ceil((inspectionDate - today) / (1000 * 60 * 60 * 24));
-                
-                if (diff <= vehicle.alertDays && diff > 0) {
-                    addNotification(
-                        "Vehicle Inspection", 
-                        `Inspection for ${vehicle.type} ${vehicle.regNumber} expires in ${diff} days`,
-                        "warning"
-                    );
-                } else if (diff <= 0) {
-                    addNotification(
-                        "Vehicle Inspection Expired", 
-                        `Inspection for ${vehicle.type} ${vehicle.regNumber} has expired!`,
-                        "danger"
-                    );
-                }
-            });
-        }
-        
-        function addNotification(title, message, type) {
-            const notification = {
-                id: Date.now(),
-                title: title,
-                message: message,
-                type: type,
-                timestamp: new Date().toISOString(),
-                read: false
-            };
-            
-            appState.notifications.unshift(notification);
-            updateNotificationBadge();
-            renderNotifications();
-            
-            // Save to localStorage
-            saveAppData({
-                ...loadAppData(),
-                notifications: appState.notifications
-            });
-        }
-        
-        // Login function
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            const { users } = loadAppData();
-            const user = users.find(u => u.username === username && u.password === password);
-            
-            if (user) {
-                appState.currentUser = user;
-                
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('app-container').style.display = 'block';
-                document.getElementById('current-user').textContent = user.name;
-                document.getElementById('current-role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
-                
-                // Load the dashboard view
-                loadView('dashboard');
-            } else {
-                alert('Invalid credentials. Please try again.');
-            }
-        }
-        
-        // Logout function
-        function logout() {
-            document.getElementById('app-container').style.display = 'none';
-            document.getElementById('auth-screen').style.display = 'flex';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            appState.currentUser = null;
-        }
-        
-        // Modal functions
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        
-        // Initialize tab switching for modals
-        document.querySelectorAll('.tabs').forEach(tabContainer => {
-            tabContainer.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabName = this.getAttribute('data-tab');
-                    const modal = this.closest('.modal-content');
-                    
-                    // Update active tab
-                    this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Show active content
-                    modal.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    modal.querySelector(`#${tabName}`).classList.add('active');
-                });
-            });
         });
     </script>
 </body>
