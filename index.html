@@ -6,6 +6,8 @@
     <title>Transport Manager Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary: #2c3e50;
@@ -19,6 +21,8 @@
             --light-gray: #f5f7fa;
             --sidebar-width: 250px;
             --header-height: 70px;
+            --notification-width: 350px;
+            --chat-width: 300px;
         }
         
         * {
@@ -82,7 +86,7 @@
             color: var(--dark);
         }
         
-        .form-group input {
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #ddd;
@@ -91,7 +95,7 @@
             transition: border-color 0.3s;
         }
         
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             border-color: var(--secondary);
             outline: none;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
@@ -105,7 +109,15 @@
             font-weight: bold;
             transition: all 0.3s;
             font-size: 1rem;
+        }
+        
+        .btn-block {
             width: 100%;
+        }
+        
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 0.9rem;
         }
         
         .btn-primary {
@@ -128,6 +140,11 @@
             color: white;
         }
         
+        .btn-info {
+            background: #2980b9;
+            color: white;
+        }
+        
         .btn:hover {
             opacity: 0.9;
             transform: translateY(-2px);
@@ -138,6 +155,7 @@
             display: none;
             height: 100vh;
             overflow: hidden;
+            position: relative;
         }
         
         .header {
@@ -171,12 +189,33 @@
         .user-info {
             display: flex;
             align-items: center;
+            gap: 15px;
         }
         
         .user-info span {
-            margin-right: 15px;
             font-weight: 500;
             color: var(--dark);
+        }
+        
+        .notification-icon {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .app-content {
@@ -227,6 +266,7 @@
             padding: 25px;
             overflow-y: auto;
             height: 100%;
+            position: relative;
         }
         
         .dashboard-header {
@@ -359,7 +399,7 @@
             background: white;
             border-radius: 10px;
             width: 90%;
-            max-width: 600px;
+            max-width: 800px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
@@ -468,30 +508,197 @@
         .sync-error { background: #fadbd8; color: #c0392b; }
         .sync-pending { background: #fef9e7; color: #f39c12; }
         
-        /* View Loading Animation */
-        .view-loader {
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--secondary);
+            background: rgba(52, 152, 219, 0.05);
+        }
+        
+        .file-upload i {
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+        
+        .file-upload p {
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+        
+        .file-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            top: var(--header-height);
+            right: 20px;
+            width: var(--notification-width);
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .notification-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            height: 100%;
         }
         
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+        .notification-list {
+            padding: 15px;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .notification-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .notification-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .notification-item.unread {
+            background: #e8f4fd;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .notification-title i {
+            margin-right: 10px;
+        }
+        
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+        
+        /* Chat Panel */
+        .chat-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: var(--chat-width);
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            max-height: 70vh;
+        }
+        
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .chat-messages {
+            padding: 15px;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            max-width: 80%;
+            position: relative;
+        }
+        
+        .message.sent {
+            background: #d5f5e3;
+            margin-left: auto;
+        }
+        
+        .message.received {
+            background: #e8f4fd;
+            margin-right: auto;
+        }
+        
+        .message-sender {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--gray);
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+        
+        /* Vehicle Info */
+        .vehicle-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .vehicle-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .vehicle-label {
+            font-weight: 600;
+            width: 120px;
         }
         
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 992px) {
             .app-content {
                 grid-template-columns: 1fr;
             }
@@ -502,6 +709,24 @@
             
             .stats-container {
                 grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                height: auto;
+                padding: 10px;
+            }
+            
+            .user-info {
+                margin-top: 10px;
+            }
+            
+            .notification-panel, .chat-panel {
+                width: 90%;
+                right: 5%;
+                left: 5%;
             }
         }
     </style>
@@ -523,7 +748,7 @@
                     <label for="password">Password</label>
                     <input type="password" id="password" placeholder="Enter your password">
                 </div>
-                <button class="btn btn-primary" onclick="login()">Login</button>
+                <button class="btn btn-primary btn-block" onclick="login()">Login</button>
                 <p style="margin-top: 15px; color: var(--gray);">
                     Demo credentials: admin / admin123
                 </p>
@@ -541,7 +766,14 @@
             <div class="user-info">
                 <span id="current-user">Admin User</span>
                 <span class="role-badge role-admin" id="current-role">Admin</span>
-                <button class="btn btn-warning" style="width: auto; padding: 8px 15px; margin-left: 15px;" onclick="logout()">
+                <div class="notification-icon" id="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notification-count">3</span>
+                </div>
+                <div class="chat-icon" id="chat-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <button class="btn btn-warning" style="padding: 8px 15px;" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             </div>
@@ -577,59 +809,452 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Notification Panel -->
+        <div class="notification-panel" id="notification-panel">
+            <div class="notification-header">
+                <h3>Notifications</h3>
+                <span class="close" onclick="closeNotificationPanel()">&times;</span>
+            </div>
+            <div class="notification-list" id="notification-list">
+                <!-- Notifications will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Chat Panel -->
+        <div class="chat-panel" id="chat-panel">
+            <div class="chat-header">
+                <h3>Team Chat</h3>
+                <span class="close" onclick="closeChatPanel()">&times;</span>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Chat messages will be populated here -->
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-input" placeholder="Type your message...">
+                <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
     </div>
     
     <!-- Modals -->
     <div class="modal" id="tender-modal">
-        <!-- Tender modal content -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Tender</h3>
+                <span class="close" onclick="closeModal('tender-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab active" data-tab="manual">Manual Entry</div>
+                    <div class="tab" data-tab="upload">Upload Document</div>
+                </div>
+                
+                <div class="tab-content active" id="manual">
+                    <form id="tender-form">
+                        <div class="form-group">
+                            <label for="origin">Origin</label>
+                            <input type="text" id="origin" name="origin" placeholder="e.g., Berlin, Germany" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="destination">Destination</label>
+                            <input type="text" id="destination" name="destination" placeholder="e.g., Paris, France" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="load_size">Load Size (sqm)</label>
+                            <input type="number" id="load_size" name="load_size" min="1" placeholder="e.g., 85" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cargo_description">Cargo Description</label>
+                            <textarea id="cargo_description" name="cargo_description" rows="3" placeholder="Describe the cargo..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="driver_id">Assign Driver</label>
+                            <select id="driver_id" name="driver_id" required>
+                                <option value="">Select Driver</option>
+                                <!-- Drivers will be populated here -->
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="createTender()">Create Tender</button>
+                    </form>
+                </div>
+                
+                <div class="tab-content" id="upload">
+                    <div class="file-upload" id="tender-upload-area">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h4>Upload Tender Document</h4>
+                        <p>Drag & drop your file here or click to browse</p>
+                        <button class="btn btn-primary">Select File</button>
+                        <input type="file" id="tender-file" style="display: none;" accept=".pdf,.doc,.docx,.jpg,.png">
+                    </div>
+                    <div class="file-info" id="tender-file-info">
+                        <h4>Detected Information:</h4>
+                        <div class="form-group">
+                            <label>Origin:</label>
+                            <p id="detected-origin">Berlin, Germany</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Destination:</label>
+                            <p id="detected-destination">Paris, France</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Load Size:</label>
+                            <p id="detected-load-size">85 sqm</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Cargo Description:</label>
+                            <p id="detected-cargo">Electronics</p>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="useDetectedTenderInfo()">Use Detected Info</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
+    
     <div class="modal" id="driver-modal">
-        <!-- Driver modal content -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Driver</h3>
+                <span class="close" onclick="closeModal('driver-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="driver-form">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" placeholder="e.g., John" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" placeholder="e.g., Smith" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact">Contact Information</label>
+                        <input type="text" id="contact" name="contact" placeholder="e.g., +49 123 456 789" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="license">License Number</label>
+                        <input type="text" id="license" name="license" placeholder="e.g., DL12345678" required>
+                    </div>
+                    
+                    <h4>Vehicle Information</h4>
+                    <div class="form-group">
+                        <label for="truck_number">Truck Registration</label>
+                        <input type="text" id="truck_number" name="truck_number" placeholder="e.g., AB 12345">
+                    </div>
+                    <div class="form-group">
+                        <label for="trailer_number">Trailer Registration</label>
+                        <input type="text" id="trailer_number" name="trailer_number" placeholder="e.g., CD 67890">
+                    </div>
+                    
+                    <h4>Fuel Cards</h4>
+                    <div id="fuel-cards-container">
+                        <div class="fuel-card-entry">
+                            <div class="form-group">
+                                <label>Card Number</label>
+                                <input type="text" name="card_number[]" placeholder="e.g., 1234 5678 9012 3456">
+                            </div>
+                            <div class="form-group">
+                                <label>PIN</label>
+                                <input type="text" name="card_pin[]" placeholder="e.g., 1234">
+                            </div>
+                            <div class="form-group">
+                                <label>Expiry Date</label>
+                                <input type="date" name="card_expiry[]">
+                            </div>
+                            <div class="form-group">
+                                <label>No Expiry Date</label>
+                                <input type="checkbox" name="card_no_expiry[]">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-info" onclick="addFuelCardField()">
+                        <i class="fas fa-plus"></i> Add Another Card
+                    </button>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label for="status">Status</label>
+                        <select id="status" name="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="createDriver()">Add Driver</button>
+                </form>
+            </div>
+        </div>
     </div>
-
+    
     <div class="modal" id="payment-modal">
-        <!-- Payment modal content -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Payment</h3>
+                <span class="close" onclick="closeModal('payment-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab active" data-tab="manual">Manual Entry</div>
+                    <div class="tab" data-tab="upload">Upload Invoice</div>
+                </div>
+                
+                <div class="tab-content active" id="manual">
+                    <form id="payment-form">
+                        <div class="form-group">
+                            <label for="payment-tender-id">Tender</label>
+                            <select id="payment-tender-id" name="tender_id" required>
+                                <option value="">Select Tender</option>
+                                <!-- Tenders will be populated here -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="invoice_number">Invoice Number</label>
+                            <input type="text" id="invoice_number" name="invoice_number" placeholder="e.g., INV-2023-001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">Amount</label>
+                            <input type="number" id="amount" name="amount" min="0" step="0.01" placeholder="e.g., 1200.50" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="currency">Currency</label>
+                            <select id="currency" name="currency" required>
+                                <option value="€">Euro (€)</option>
+                                <option value="$">Dollar ($)</option>
+                                <option value="£">Pound (£)</option>
+                                <option value="zł">Złoty (zł)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="issue_date">Issue Date</label>
+                            <input type="date" id="issue_date" name="issue_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="due_days">Due in (days)</label>
+                            <input type="number" id="due_days" name="due_days" min="1" value="30" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="payment-status">Status</label>
+                            <select id="payment-status" name="status" required>
+                                <option value="pending">Pending</option>
+                                <option value="paid">Paid</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="createPayment()">Add Payment</button>
+                    </form>
+                </div>
+                
+                <div class="tab-content" id="upload">
+                    <div class="file-upload" id="invoice-upload-area">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <h4>Upload Invoice Document</h4>
+                        <p>Drag & drop your file here or click to browse</p>
+                        <button class="btn btn-primary">Select File</button>
+                        <input type="file" id="invoice-file" style="display: none;" accept=".pdf,.jpg,.png">
+                    </div>
+                    <div class="file-info" id="invoice-file-info">
+                        <h4>Detected Information:</h4>
+                        <div class="form-group">
+                            <label>Invoice Number:</label>
+                            <p id="detected-invoice-number">INV-2023-045</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount:</label>
+                            <p id="detected-amount">€1,250.00</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Currency:</label>
+                            <p id="detected-currency">Euro (€)</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Issue Date:</label>
+                            <p id="detected-issue-date">2023-10-15</p>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="useDetectedInvoiceInfo()">Use Detected Info</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
+    
     <div class="modal" id="user-modal">
-        <!-- User modal content -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>User Management</h3>
+                <span class="close" onclick="closeModal('user-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab active" data-tab="add">Add User</div>
+                    <div class="tab" data-tab="edit">Edit Users</div>
+                </div>
+                
+                <div class="tab-content active" id="add">
+                    <form id="user-form">
+                        <div class="form-group">
+                            <label for="new-username">Username</label>
+                            <input type="text" id="new-username" name="username" placeholder="e.g., dispatcher1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">Password</label>
+                            <input type="password" id="new-password" name="password" placeholder="Enter password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="full-name">Full Name</label>
+                            <input type="text" id="full-name" name="full_name" placeholder="e.g., John Smith" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-role">Role</label>
+                            <select id="user-role" name="role" required>
+                                <option value="admin">Admin</option>
+                                <option value="dispatcher">Dispatcher</option>
+                                <option value="driver">Driver</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="createUser()">Add User</button>
+                    </form>
+                </div>
+                
+                <div class="tab-content" id="edit">
+                    <div class="form-group">
+                        <label for="edit-user">Select User</label>
+                        <select id="edit-user" class="form-control" onchange="loadUserDetails()">
+                            <option value="">Select a user</option>
+                            <!-- Users will be populated here -->
+                        </select>
+                    </div>
+                    <form id="edit-user-form" style="display: none;">
+                        <input type="hidden" id="edit-username">
+                        <div class="form-group">
+                            <label for="edit-full-name">Full Name</label>
+                            <input type="text" id="edit-full-name" name="full_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-role">Role</label>
+                            <select id="edit-role" name="role" required>
+                                <option value="admin">Admin</option>
+                                <option value="dispatcher">Dispatcher</option>
+                                <option value="driver">Driver</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-password">New Password (leave blank to keep current)</label>
+                            <input type="password" id="edit-password" name="password">
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="updateUser()">Update User</button>
+                        <button type="button" class="btn btn-danger" onclick="deleteUser()">Delete User</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
+    
     <div class="modal" id="view-tender-modal">
-        <!-- View tender modal content -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tender Details</h3>
+                <span class="close" onclick="closeModal('view-tender-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="tab-container">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="details">Details</div>
+                        <div class="tab" data-tab="status">Update Status</div>
+                        <div class="tab" data-tab="issues">Report Issue</div>
+                        <div class="tab" data-tab="route">Route Planning</div>
+                    </div>
+                    
+                    <div id="details-tab" class="tab-content active">
+                        <!-- Tender details will be loaded here -->
+                    </div>
+                    
+                    <div id="status-tab" class="tab-content">
+                        <form id="status-form">
+                            <input type="hidden" id="tender-id" name="tender_id">
+                            <div class="form-group">
+                                <label for="status">Update Status</label>
+                                <select id="status" name="status" required>
+                                    <option value="pending">Pending</option>
+                                    <option value="assigned">Assigned</option>
+                                    <option value="picked_up">Picked Up</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="cancellation-reason-container" style="display:none;">
+                                <label for="cancellation_reason">Cancellation Reason</label>
+                                <textarea id="cancellation_reason" name="cancellation_reason" rows="3"></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="updateTenderStatus()">Update Status</button>
+                        </form>
+                    </div>
+                    
+                    <div id="issues-tab" class="tab-content">
+                        <form id="issue-form">
+                            <input type="hidden" id="issue-tender-id" name="tender_id">
+                            <div class="form-group">
+                                <label for="issue_description">Issue Description</label>
+                                <textarea id="issue_description" name="issue_description" rows="4" required></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="reportIssue()">Report Issue</button>
+                        </form>
+                    </div>
+                    
+                    <div id="route-tab" class="tab-content">
+                        <div class="form-group">
+                            <label for="route-map">Route Map</label>
+                            <div id="route-map" style="height: 300px; background: #f5f7fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                                <p>Route visualization will appear here</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="route-distance">Distance (km)</label>
+                            <input type="number" id="route-distance" min="1" placeholder="Enter distance">
+                        </div>
+                        <div class="form-group">
+                            <label for="route-notes">Route Notes</label>
+                            <textarea id="route-notes" rows="3" placeholder="Add any route-specific notes"></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="saveRouteInfo()">Save Route Information</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- View Templates (Hidden until needed) -->
-    <div id="view-templates" style="display: none;">
-        <!-- Dashboard View -->
-        <div id="dashboard-view">
-            <!-- Dashboard content -->
-        </div>
-        
-        <!-- Drivers View -->
-        <div id="drivers-view">
-            <!-- Drivers content -->
-        </div>
-        
-        <!-- Tenders View -->
-        <div id="tenders-view">
-            <!-- Tenders content -->
-        </div>
-        
-        <!-- Payments View -->
-        <div id="payments-view">
-            <!-- Payments content -->
-        </div>
-        
-        <!-- Reports View -->
-        <div id="reports-view">
-            <!-- Reports content -->
-        </div>
-        
-        <!-- Admin View -->
-        <div id="admin-view">
-            <!-- Admin content -->
+    
+    <div class="modal" id="vehicle-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Vehicle Details</h3>
+                <span class="close" onclick="closeModal('vehicle-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="vehicle-form">
+                    <div class="form-group">
+                        <label for="vehicle-type">Vehicle Type</label>
+                        <select id="vehicle-type" required>
+                            <option value="truck">Truck</option>
+                            <option value="trailer">Trailer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicle-reg">Registration Number</label>
+                        <input type="text" id="vehicle-reg" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="oc-expiry">OC Expiry Date</label>
+                        <input type="date" id="oc-expiry" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inspection-expiry">Inspection Expiry Date</label>
+                        <input type="date" id="inspection-expiry" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="alert-days">Alert Days Before Expiry</label>
+                        <input type="number" id="alert-days" min="1" value="14">
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="saveVehicleInfo()">Save Vehicle</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -644,124 +1269,241 @@
                 token: '',
                 filename: 'transport-data.json'
             },
-            currentView: 'dashboard'
+            currentView: 'dashboard',
+            notifications: [],
+            chatMessages: [],
+            vehicles: [],
+            inspections: [],
+            chatUsers: []
         };
         
-        // Initialize demo data with proper error handling
+        // Initialize demo data
         function initDemoData() {
-            const defaultDrivers = [
-                { id: 1, firstName: "John", lastName: "Smith", contact: "+49 123 456 789", license: "DL12345678", status: "active", assignedTenders: 3, avgLoad: 78 },
-                { id: 2, firstName: "Emma", lastName: "Johnson", contact: "+49 987 654 321", license: "DL23456789", status: "active", assignedTenders: 2, avgLoad: 85 },
-                { id: 3, firstName: "Robert", lastName: "Davis", contact: "+49 555 123 456", license: "DL34567890", status: "active", assignedTenders: 4, avgLoad: 65 },
-                { id: 4, firstName: "Sophia", lastName: "Miller", contact: "+49 111 222 333", license: "DL45678901", status: "inactive", assignedTenders: 0, avgLoad: 0 }
-            ];
-            
-            const defaultTenders = [
-                { id: 1, origin: "Berlin", destination: "Hamburg", driverId: 1, driver: "John Smith", distance: 290, load: 90, status: "delivered", revenue: 1450, cargo: "Electronics", createdAt: new Date(Date.now() - 86400000).toISOString() },
-                { id: 2, origin: "Munich", destination: "Frankfurt", driverId: 2, driver: "Emma Johnson", distance: 390, load: 85, status: "in_progress", revenue: 1950, cargo: "Furniture", createdAt: new Date(Date.now() - 172800000).toISOString() },
-                { id: 3, origin: "Cologne", destination: "Stuttgart", driverId: 3, driver: "Robert Davis", distance: 250, load: 70, status: "assigned", revenue: 1250, cargo: "Automotive parts", createdAt: new Date(Date.now() - 259200000).toISOString() },
-                { id: 4, origin: "Dresden", destination: "Leipzig", driverId: 1, driver: "John Smith", distance: 120, load: 95, status: "picked_up", revenue: 600, cargo: "Food products", createdAt: new Date(Date.now() - 345600000).toISOString() },
-                { id: 5, origin: "Düsseldorf", destination: "Hannover", driverId: 3, driver: "Robert Davis", distance: 280, load: 80, status: "delivered", revenue: 1400, cargo: "Industrial equipment", createdAt: new Date(Date.now() - 432000000).toISOString() }
-            ];
-            
-            const defaultPayments = [
-                { id: 1, tenderId: 1, invoiceNumber: "INV-2023-001", amount: 1450, issueDate: "2023-01-15", dueDate: "2023-02-15", status: "paid", paymentDate: "2023-02-10" },
-                { id: 2, tenderId: 5, invoiceNumber: "INV-2023-002", amount: 1400, issueDate: "2023-02-01", dueDate: "2023-03-01", status: "paid", paymentDate: "2023-02-28" },
-                { id: 3, tenderId: 2, invoiceNumber: "INV-2023-003", amount: 1950, issueDate: "2023-03-10", dueDate: "2023-04-10", status: "pending" }
-            ];
-            
-            const defaultUsers = [
+            // Users
+            const users = [
                 { username: "admin", password: "admin123", name: "Administrator", role: "admin", lastLogin: new Date().toISOString() },
-                { username: "dispatcher1", password: "dispatch123", name: "John Smith", role: "dispatcher", lastLogin: new Date(Date.now() - 86400000).toISOString() }
+                { username: "dispatcher1", password: "dispatch123", name: "John Smith", role: "dispatcher", lastLogin: new Date(Date.now() - 86400000).toISOString() },
+                { username: "driver1", password: "driver123", name: "Robert Davis", role: "driver", lastLogin: null }
             ];
             
-            const defaultSettings = {
-                currency: '€',
-                distanceUnit: 'km'
-            };
+            // Drivers
+            const drivers = [
+                { 
+                    id: 1, 
+                    firstName: "John", 
+                    lastName: "Smith", 
+                    contact: "+49 123 456 789", 
+                    license: "DL12345678", 
+                    status: "active",
+                    truck: "AB 12345",
+                    trailer: "CD 67890",
+                    fuelCards: [
+                        { number: "123456789012", pin: "1234", expiry: "2025-12-31" },
+                        { number: "987654321098", pin: "4321", noExpiry: true }
+                    ]
+                },
+                { 
+                    id: 2, 
+                    firstName: "Emma", 
+                    lastName: "Johnson", 
+                    contact: "+49 987 654 321", 
+                    license: "DL23456789", 
+                    status: "active",
+                    truck: "EF 54321",
+                    trailer: "GH 09876",
+                    fuelCards: [
+                        { number: "456789012345", pin: "5678", expiry: "2024-06-30" }
+                    ]
+                }
+            ];
             
-            const githubConfig = {
-                repo: '',
-                token: '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',
-                filename: 'transport-data.json'
-            };
+            // Tenders
+            const tenders = [
+                { 
+                    id: 1, 
+                    origin: "Berlin", 
+                    destination: "Hamburg", 
+                    driverId: 1, 
+                    driver: "John Smith", 
+                    loadSize: 85, 
+                    loadPercentage: 85, 
+                    status: "delivered", 
+                    revenue: 1450, 
+                    currency: "€",
+                    cargo: "Electronics", 
+                    createdAt: new Date(Date.now() - 86400000).toISOString() 
+                },
+                { 
+                    id: 2, 
+                    origin: "Munich", 
+                    destination: "Frankfurt", 
+                    driverId: 2, 
+                    driver: "Emma Johnson", 
+                    loadSize: 75, 
+                    loadPercentage: 75, 
+                    status: "in_progress", 
+                    revenue: 1950, 
+                    currency: "€",
+                    cargo: "Furniture", 
+                    createdAt: new Date(Date.now() - 172800000).toISOString() 
+                }
+            ];
             
-            // Initialize with safe defaults if storage is empty
-            if (!localStorage.getItem('transport_drivers')) {
-                localStorage.setItem('transport_drivers', JSON.stringify(defaultDrivers));
-            }
-            if (!localStorage.getItem('transport_tenders')) {
-                localStorage.setItem('transport_tenders', JSON.stringify(defaultTenders));
-            }
-            if (!localStorage.getItem('transport_payments')) {
-                localStorage.setItem('transport_payments', JSON.stringify(defaultPayments));
-            }
-            if (!localStorage.getItem('transport_users')) {
-                localStorage.setItem('transport_users', JSON.stringify(defaultUsers));
-            }
-            if (!localStorage.getItem('transport_settings')) {
-                localStorage.setItem('transport_settings', JSON.stringify(defaultSettings));
-            }
-            if (!localStorage.getItem('github_config')) {
-                localStorage.setItem('github_config', JSON.stringify(githubConfig));
-            }
+            // Payments
+            const payments = [
+                { 
+                    id: 1, 
+                    tenderId: 1, 
+                    invoiceNumber: "INV-2023-001", 
+                    amount: 1450, 
+                    currency: "€",
+                    issueDate: "2023-01-15", 
+                    dueDate: "2023-02-15", 
+                    status: "paid", 
+                    paymentDate: "2023-02-10" 
+                },
+                { 
+                    id: 2, 
+                    tenderId: 2, 
+                    invoiceNumber: "INV-2023-002", 
+                    amount: 1950, 
+                    currency: "€",
+                    issueDate: "2023-03-10", 
+                    dueDate: "2023-04-10", 
+                    status: "pending" 
+                }
+            ];
+            
+            // Vehicles and Inspections
+            const vehicles = [
+                {
+                    id: 1,
+                    type: "truck",
+                    regNumber: "AB 12345",
+                    driverId: 1,
+                    ocExpiry: "2024-06-30",
+                    inspectionExpiry: "2024-03-15",
+                    alertDays: 14
+                },
+                {
+                    id: 2,
+                    type: "trailer",
+                    regNumber: "CD 67890",
+                    driverId: 1,
+                    ocExpiry: "2024-07-31",
+                    inspectionExpiry: "2024-04-20",
+                    alertDays: 14
+                }
+            ];
+            
+            // Notifications
+            const notifications = [
+                {
+                    id: 1,
+                    title: "Payment Due",
+                    message: "Invoice INV-2023-002 is due in 5 days",
+                    type: "warning",
+                    timestamp: new Date().toISOString(),
+                    read: false
+                },
+                {
+                    id: 2,
+                    title: "Vehicle Inspection",
+                    message: "Inspection for trailer CD 67890 expires in 10 days",
+                    type: "warning",
+                    timestamp: new Date(Date.now() - 3600000).toISOString(),
+                    read: false
+                },
+                {
+                    id: 3,
+                    title: "New Message",
+                    message: "You have a new message from Robert Davis",
+                    type: "info",
+                    timestamp: new Date(Date.now() - 7200000).toISOString(),
+                    read: true
+                }
+            ];
+            
+            // Chat messages
+            const chatMessages = [
+                {
+                    id: 1,
+                    sender: "Robert Davis",
+                    message: "Hi team, just completed the Berlin to Hamburg delivery",
+                    timestamp: new Date(Date.now() - 3600000).toISOString()
+                },
+                {
+                    id: 2,
+                    sender: "John Smith",
+                    message: "Great job Robert! Any issues on the route?",
+                    timestamp: new Date(Date.now() - 3500000).toISOString()
+                }
+            ];
+            
+            // Save to localStorage
+            localStorage.setItem('transport_users', JSON.stringify(users));
+            localStorage.setItem('transport_drivers', JSON.stringify(drivers));
+            localStorage.setItem('transport_tenders', JSON.stringify(tenders));
+            localStorage.setItem('transport_payments', JSON.stringify(payments));
+            localStorage.setItem('transport_vehicles', JSON.stringify(vehicles));
+            localStorage.setItem('transport_notifications', JSON.stringify(notifications));
+            localStorage.setItem('transport_chat', JSON.stringify(chatMessages));
+            
+            // Initialize appState
+            appState.notifications = notifications;
+            appState.chatMessages = chatMessages;
+            appState.vehicles = vehicles;
         }
         
-        // Load application data with error handling
+        // Load application data
         function loadAppData() {
-            try {
-                // Initialize with default data if not exists
+            // Load from localStorage or initialize demo data
+            if (!localStorage.getItem('transport_users')) {
                 initDemoData();
-                
-                // Parse data with proper error handling
-                const drivers = JSON.parse(localStorage.getItem('transport_drivers') || '[]');
-                const tenders = JSON.parse(localStorage.getItem('transport_tenders') || '[]');
-                const payments = JSON.parse(localStorage.getItem('transport_payments') || '[]');
-                const users = JSON.parse(localStorage.getItem('transport_users') || '[]');
-                const settings = JSON.parse(localStorage.getItem('transport_settings') || '{}');
-                
-                // Validate data structure
-                if (!Array.isArray(drivers)) throw new Error('Invalid drivers data');
-                if (!Array.isArray(tenders)) throw new Error('Invalid tenders data');
-                if (!Array.isArray(payments)) throw new Error('Invalid payments data');
-                if (!Array.isArray(users)) throw new Error('Invalid users data');
-                
-                // Update app state
-                appState.currency = settings.currency || '€';
-                appState.distanceUnit = settings.distanceUnit || 'km';
-                
-                // Update GitHub config
-                const githubConfig = JSON.parse(localStorage.getItem('github_config') || '{}');
-                appState.githubConfig = {
-                    repo: githubConfig.repo || '',
-                    token: githubConfig.token || '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',
-                    filename: githubConfig.filename || 'transport-data.json'
-                };
-                
-                return { drivers, tenders, payments, users };
-            } catch (error) {
-                console.error('Error loading app data:', error);
-                // Reset to default data if parsing fails
-                localStorage.clear();
-                initDemoData();
-                return loadAppData(); // Recursively try again
             }
+            
+            return {
+                users: JSON.parse(localStorage.getItem('transport_users') || '[]'),
+                drivers: JSON.parse(localStorage.getItem('transport_drivers') || '[]'),
+                tenders: JSON.parse(localStorage.getItem('transport_tenders') || '[]'),
+                payments: JSON.parse(localStorage.getItem('transport_payments') || '[]'),
+                vehicles: JSON.parse(localStorage.getItem('transport_vehicles') || '[]'),
+                notifications: JSON.parse(localStorage.getItem('transport_notifications') || '[]'),
+                chatMessages: JSON.parse(localStorage.getItem('transport_chat') || '[]')
+            };
         }
         
-        // Save application data with error handling
+        // Save application data
         function saveAppData(data) {
-            try {
-                if (!data || typeof data !== 'object') throw new Error('Invalid data to save');
-                
-                localStorage.setItem('transport_drivers', JSON.stringify(data.drivers || []));
-                localStorage.setItem('transport_tenders', JSON.stringify(data.tenders || []));
-                localStorage.setItem('transport_payments', JSON.stringify(data.payments || []));
-                localStorage.setItem('transport_users', JSON.stringify(data.users || []));
-                return true;
-            } catch (error) {
-                console.error('Error saving app data:', error);
-                return false;
-            }
+            localStorage.setItem('transport_users', JSON.stringify(data.users || []));
+            localStorage.setItem('transport_drivers', JSON.stringify(data.drivers || []));
+            localStorage.setItem('transport_tenders', JSON.stringify(data.tenders || []));
+            localStorage.setItem('transport_payments', JSON.stringify(data.payments || []));
+            localStorage.setItem('transport_vehicles', JSON.stringify(data.vehicles || []));
+            localStorage.setItem('transport_notifications', JSON.stringify(data.notifications || []));
+            localStorage.setItem('transport_chat', JSON.stringify(data.chatMessages || []));
+        }
+        
+        // Initialize the application
+        function initApp() {
+            const data = loadAppData();
+            
+            // Update app state
+            appState.notifications = data.notifications;
+            appState.chatMessages = data.chatMessages;
+            appState.vehicles = data.vehicles;
+            
+            // Update notification badge
+            updateNotificationBadge();
+            
+            // Render notifications
+            renderNotifications();
+            
+            // Render chat messages
+            renderChatMessages();
+            
+            // Check for expiring inspections
+            checkExpiringInspections();
         }
         
         // View Management System
@@ -772,13 +1514,28 @@
             const mainContent = document.getElementById('main-content');
             mainContent.innerHTML = '<div class="view-loader"><div class="loader"></div></div>';
             
-            // Simulate loading delay
+            // Load view after short delay
             setTimeout(() => {
-                // Get the view content
-                const viewContent = document.getElementById(`${viewName}-view`).innerHTML;
-                
-                // Update the main content area
-                mainContent.innerHTML = viewContent;
+                switch(viewName) {
+                    case 'dashboard':
+                        loadDashboardView();
+                        break;
+                    case 'drivers':
+                        loadDriversView();
+                        break;
+                    case 'tenders':
+                        loadTendersView();
+                        break;
+                    case 'payments':
+                        loadPaymentsView();
+                        break;
+                    case 'reports':
+                        loadReportsView();
+                        break;
+                    case 'admin':
+                        loadAdminView();
+                        break;
+                }
                 
                 // Update active navigation item
                 document.querySelectorAll('.nav-item').forEach(item => {
@@ -787,253 +1544,41 @@
                         item.classList.add('active');
                     }
                 });
-                
-                // Initialize the view
-                initView(viewName);
             }, 300);
         }
         
-        function initView(viewName) {
-            switch(viewName) {
-                case 'dashboard':
-                    updateDashboard();
-                    renderRecentTenders();
-                    initCharts();
-                    break;
-                case 'drivers':
-                    renderDrivers();
-                    break;
-                case 'tenders':
-                    renderAllTenders();
-                    break;
-                case 'payments':
-                    renderPayments();
-                    break;
-                case 'reports':
-                    updateReports();
-                    setupTabSwitching();
-                    break;
-                case 'admin':
-                    setupTabSwitching();
-                    break;
-            }
-        }
-        
-        function setupTabSwitching() {
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabName = this.getAttribute('data-tab');
-                    const tabContainer = this.closest('.tabs').nextElementSibling;
-                    
-                    // Update active tab
-                    this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Show active content
-                    tabContainer.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    tabContainer.querySelector(`#${tabName}`).classList.add('active');
-                    
-                    // Update reports when switching tabs
-                    if (this.closest('#reports-content')) {
-                        updateReports();
-                    }
-                });
-            });
-        }
-        
-        // Authentication functions
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        function loadDashboardView() {
+            const { tenders, drivers, payments, vehicles } = loadAppData();
             
-            const { users } = loadAppData();
-            const user = users.find(u => u.username === username && u.password === password);
-            
-            if (user) {
-                appState.currentUser = user;
-                
-                // Update last login
-                user.lastLogin = new Date().toISOString();
-                localStorage.setItem('transport_users', JSON.stringify(users));
-                
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('app-container').style.display = 'block';
-                document.getElementById('current-user').textContent = user.name;
-                document.getElementById('current-role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
-                
-                // Load the dashboard view
-                loadView('dashboard');
-                
-                // Load GitHub config
-                const githubConfig = JSON.parse(localStorage.getItem('github_config') || {});
-                if (githubConfig.repo) {
-                    document.getElementById('github-repo').value = githubConfig.repo;
-                }
-                if (githubConfig.token) {
-                    document.getElementById('github-token').value = githubConfig.token;
-                }
-                if (githubConfig.filename) {
-                    document.getElementById('github-filename').value = githubConfig.filename;
-                }
-            } else {
-                alert('Invalid credentials. Please try again.');
-            }
-        }
-        
-        function logout() {
-            document.getElementById('app-container').style.display = 'none';
-            document.getElementById('auth-screen').style.display = 'flex';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            appState.currentUser = null;
-        }
-        
-        // Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const target = this.getAttribute('data-target');
-                loadView(target);
-            });
-        });
-        
-        // Update dashboard
-        function updateDashboard() {
-            const { tenders, drivers, payments } = loadAppData();
-            
-            // Update current date
-            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-            });
-            
-            // Update stats
-            const activeTenders = tenders.filter(t => t.status !== 'delivered' && t.status !== 'cancelled').length;
-            document.getElementById('active-tenders').textContent = activeTenders;
-            
-            const activeDrivers = drivers.filter(d => d.status === 'active').length;
-            document.getElementById('total-drivers').textContent = activeDrivers;
-            
-            const pendingPayments = payments.filter(p => p.status === 'pending').length;
-            document.getElementById('pending-payments').textContent = pendingPayments;
-            
-            // Calculate monthly revenue (last 30 days)
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            
-            const monthlyRevenue = payments
-                .filter(p => new Date(p.issueDate) >= thirtyDaysAgo && p.status === 'paid')
-                .reduce((sum, p) => sum + p.amount, 0);
-            
-            document.getElementById('monthly-revenue').textContent = `${appState.currency}${monthlyRevenue.toFixed(2)}`;
-        }
-        
-        // Render drivers
-        function renderDrivers() {
-            const { drivers, tenders } = loadAppData();
-            const driversList = document.getElementById('drivers-list');
-            driversList.innerHTML = '';
-            
-            drivers.forEach(driver => {
-                const driverTenders = tenders.filter(t => t.driverId === driver.id);
-                const avgLoad = driverTenders.length > 0 
-                    ? driverTenders.reduce((sum, t) => sum + t.load, 0) / driverTenders.length 
-                    : 0;
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${driver.firstName} ${driver.lastName}</td>
-                    <td>${driver.contact}</td>
-                    <td><span class="status-badge ${driver.status === 'active' ? 'status-in_progress' : 'status-cancelled'}">
-                        ${driver.status === 'active' ? 'Active' : 'Inactive'}
-                    </span></td>
-                    <td>${driverTenders.length}</td>
-                    <td>${avgLoad.toFixed(1)}%</td>
-                    <td>
-                        <button class="btn btn-warning" style="padding: 5px 10px;" onclick="editDriver(${driver.id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger" style="padding: 5px 10px; margin-left: 5px;" onclick="deleteDriver(${driver.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                driversList.appendChild(row);
-            });
-        }
-        
-        // ... (Other view-specific functions remain similar to previous implementation) ...
-        
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set up view templates
-            setupViewTemplates();
-            
-            // Initialize demo data
-            initDemoData();
-            
-            // Set current date
-            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-            });
-            
-            // Set default issue date and due date for payments
-            const today = new Date().toISOString().split('T')[0];
-            const nextWeek = new Date();
-            nextWeek.setDate(nextWeek.getDate() + 7);
-            const nextWeekFormatted = nextWeek.toISOString().split('T')[0];
-            
-            // Load settings
-            const settings = JSON.parse(localStorage.getItem('transport_settings') || '{}');
-            if (settings.currency) {
-                document.getElementById('currency').value = settings.currency;
-            }
-            if (settings.distanceUnit) {
-                document.getElementById('distance-unit').value = settings.distanceUnit;
-            }
-            
-            // Initialize GitHub config
-            const githubConfig = JSON.parse(localStorage.getItem('github_config') || '{}');
-            if (githubConfig.repo) {
-                document.getElementById('github-repo').value = githubConfig.repo;
-            }
-            if (githubConfig.token) {
-                document.getElementById('github-token').value = githubConfig.token;
-            }
-            if (githubConfig.filename) {
-                document.getElementById('github-filename').value = githubConfig.filename;
-            }
-        });
-        
-        // Setup view templates
-        function setupViewTemplates() {
-            // Dashboard View
-            document.getElementById('dashboard-view').innerHTML = `
+            const content = `
                 <div class="dashboard-header">
                     <h1>Dashboard</h1>
-                    <div id="current-date"></div>
+                    <div id="current-date">${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
                 </div>
                 
                 <div class="stats-container">
                     <div class="stat-card">
                         <i class="fas fa-truck-loading icon"></i>
                         <h3>Active Tenders</h3>
-                        <div class="value" id="active-tenders">0</div>
+                        <div class="value">${tenders.filter(t => t.status !== 'delivered' && t.status !== 'cancelled').length}</div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-users icon"></i>
                         <h3>Total Drivers</h3>
-                        <div class="value" id="total-drivers">0</div>
+                        <div class="value">${drivers.filter(d => d.status === 'active').length}</div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-exclamation-triangle icon"></i>
                         <h3>Pending Payments</h3>
-                        <div class="value" id="pending-payments">0</div>
+                        <div class="value">${payments.filter(p => p.status === 'pending').length}</div>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-euro-sign icon"></i>
                         <h3>Monthly Revenue</h3>
-                        <div class="value" id="monthly-revenue">€0</div>
+                        <div class="value">€${payments
+                            .filter(p => new Date(p.issueDate) >= new Date(Date.now() - 30*24*60*60*1000) && p.status === 'paid')
+                            .reduce((sum, p) => sum + p.amount, 0)
+                            .toFixed(2)}</div>
                     </div>
                 </div>
                 
@@ -1050,342 +1595,344 @@
                                 <th>ID</th>
                                 <th>Route</th>
                                 <th>Driver</th>
-                                <th>Distance</th>
                                 <th>Load %</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="recent-tenders">
-                            <!-- Tenders will be populated here -->
+                        <tbody>
+                            ${tenders.slice(0, 5).map(tender => `
+                                <tr>
+                                    <td>#${tender.id}</td>
+                                    <td>${tender.origin} to ${tender.destination}</td>
+                                    <td>${tender.driver || 'Unassigned'}</td>
+                                    <td>${tender.loadPercentage}%</td>
+                                    <td><span class="status-badge status-${tender.status.replace(' ', '_')}">
+                                        ${tender.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                    </span></td>
+                                    <td>
+                                        <button class="btn btn-primary" style="padding: 5px 10px;" onclick="viewTender(${tender.id})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
                         </tbody>
                     </table>
                 </div>
                 
                 <div class="section">
                     <div class="section-header">
-                        <h2>Performance Overview</h2>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="performance-chart"></canvas>
-                    </div>
-                </div>
-            `;
-            
-            // Drivers View
-            document.getElementById('drivers-view').innerHTML = `
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Driver Management</h2>
-                        <button class="btn btn-primary" onclick="openModal('driver-modal')">
-                            <i class="fas fa-plus"></i> Add Driver
-                        </button>
+                        <h2>Upcoming Inspections</h2>
                     </div>
                     <table>
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Contact</th>
-                                <th>Status</th>
-                                <th>Assigned Tenders</th>
-                                <th>Avg. Load %</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="drivers-list">
-                            <!-- Drivers will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            // Tenders View
-            document.getElementById('tenders-view').innerHTML = `
-                <div class="section">
-                    <div class="section-header">
-                        <h2>All Tenders</h2>
-                        <button class="btn btn-primary" onclick="openModal('tender-modal')">
-                            <i class="fas fa-plus"></i> New Tender
-                        </button>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Route</th>
+                                <th>Vehicle</th>
+                                <th>Type</th>
+                                <th>Inspection Due</th>
+                                <th>OC Due</th>
                                 <th>Driver</th>
-                                <th>Distance</th>
-                                <th>Load %</th>
                                 <th>Status</th>
-                                <th>Revenue</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="all-tenders">
-                            <!-- All tenders will be populated here -->
+                        <tbody>
+                            ${vehicles.slice(0, 5).map(vehicle => {
+                                const driver = drivers.find(d => d.id === vehicle.driverId);
+                                const today = new Date();
+                                const inspectionDate = new Date(vehicle.inspectionExpiry);
+                                const ocDate = new Date(vehicle.ocExpiry);
+                                const inspectionDiff = Math.ceil((inspectionDate - today) / (1000 * 60 * 60 * 24));
+                                const ocDiff = Math.ceil((ocDate - today) / (1000 * 60 * 60 * 24));
+                                
+                                let inspectionStatus = 'safe';
+                                if (inspectionDiff <= 0) inspectionStatus = 'expired';
+                                else if (inspectionDiff <= 14) inspectionStatus = 'warning';
+                                
+                                let ocStatus = 'safe';
+                                if (ocDiff <= 0) ocStatus = 'expired';
+                                else if (ocDiff <= 14) ocStatus = 'warning';
+                                
+                                return `
+                                    <tr>
+                                        <td>${vehicle.regNumber}</td>
+                                        <td>${vehicle.type}</td>
+                                        <td>
+                                            <span class="status-badge ${inspectionStatus === 'expired' ? 'status-overdue' : inspectionStatus === 'warning' ? 'status-pending' : 'status-delivered'}">
+                                                ${inspectionDate.toLocaleDateString()} (${inspectionDiff} days)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge ${ocStatus === 'expired' ? 'status-overdue' : ocStatus === 'warning' ? 'status-pending' : 'status-delivered'}">
+                                                ${ocDate.toLocaleDateString()} (${ocDiff} days)
+                                            </span>
+                                        </td>
+                                        <td>${driver ? driver.firstName + ' ' + driver.lastName : 'Unassigned'}</td>
+                                        <td>
+                                            <button class="btn btn-warning btn-sm" onclick="editVehicle(${vehicle.id})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
             `;
             
-            // Payments View
-            document.getElementById('payments-view').innerHTML = `
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Payment Management</h2>
-                        <button class="btn btn-primary" onclick="openModal('payment-modal')">
-                            <i class="fas fa-plus"></i> Add Payment
-                        </button>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Invoice #</th>
-                                <th>Tender ID</th>
-                                <th>Amount</th>
-                                <th>Due Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="payments-list">
-                            <!-- Payments will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            // Reports View
-            document.getElementById('reports-view').innerHTML = `
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Performance Reports</h2>
-                        <div>
-                            <button class="btn btn-primary" onclick="generateReport('weekly')">
-                                <i class="fas fa-download"></i> Weekly Report
-                            </button>
-                            <button class="btn btn-success" style="margin-left: 10px;" onclick="generateReport('monthly')">
-                                <i class="fas fa-download"></i> Monthly Report
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="tabs">
-                        <div class="tab active" data-tab="driver-reports">Driver Reports</div>
-                        <div class="tab" data-tab="fleet-reports">Fleet Reports</div>
-                        <div class="tab" data-tab="financial-reports">Financial Reports</div>
-                    </div>
-                    
-                    <div class="tab-content active" id="driver-reports">
-                        <h3>Driver Performance</h3>
-                        <div class="chart-container">
-                            <canvas id="driver-performance-chart"></canvas>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Driver</th>
-                                    <th>Tenders</th>
-                                    <th>Total Km</th>
-                                    <th>Avg. Load %</th>
-                                    <th>Revenue</th>
-                                    <th>€/Km</th>
-                                </tr>
-                            </thead>
-                            <tbody id="driver-performance-data">
-                                <!-- Driver performance data will be populated here -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="tab-content" id="fleet-reports">
-                        <h3>Fleet Utilization</h3>
-                        <div class="chart-container">
-                            <canvas id="fleet-utilization-chart"></canvas>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Metric</th>
-                                    <th>Value</th>
-                                </tr>
-                            </thead>
-                            <tbody id="fleet-utilization-data">
-                                <tr>
-                                    <td>Total Kilometers</td>
-                                    <td id="total-km">0 km</td>
-                                </tr>
-                                <tr>
-                                    <td>Average Load Percentage</td>
-                                    <td id="avg-load">0%</td>
-                                </tr>
-                                <tr>
-                                    <td>Revenue per Kilometer</td>
-                                    <td id="revenue-per-km">€0.00</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="tab-content" id="financial-reports">
-                        <h3>Revenue Overview</h3>
-                        <div class="chart-container">
-                            <canvas id="revenue-chart"></canvas>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Period</th>
-                                    <th>Revenue</th>
-                                    <th>Expenses</th>
-                                    <th>Profit</th>
-                                </tr>
-                            </thead>
-                            <tbody id="financial-data">
-                                <tr>
-                                    <td>This Week</td>
-                                    <td id="week-revenue">€0</td>
-                                    <td id="week-expenses">€0</td>
-                                    <td id="week-profit">€0</td>
-                                </tr>
-                                <tr>
-                                    <td>This Month</td>
-                                    <td id="month-revenue">€0</td>
-                                    <td id="month-expenses">€0</td>
-                                    <td id="month-profit">€0</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-            
-            // Admin View
-            document.getElementById('admin-view').innerHTML = `
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Administration</h2>
-                    </div>
-                    
-                    <div class="tabs">
-                        <div class="tab active" data-tab="users">Users</div>
-                        <div class="tab" data-tab="github">GitHub Sync</div>
-                        <div class="tab" data-tab="settings">Settings</div>
-                    </div>
-                    
-                    <div class="tab-content active" id="users">
-                        <h3>User Management</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Name</th>
-                                    <th>Role</th>
-                                    <th>Last Login</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-list">
-                                <tr>
-                                    <td>admin</td>
-                                    <td>Administrator</td>
-                                    <td><span class="role-badge role-admin">Admin</span></td>
-                                    <td>Today</td>
-                                    <td>
-                                        <button class="btn btn-warning" style="padding: 5px 10px;">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>dispatcher1</td>
-                                    <td>John Smith</td>
-                                    <td><span class="role-badge role-dispatcher">Dispatcher</span></td>
-                                    <td>Yesterday</td>
-                                    <td>
-                                        <button class="btn btn-warning" style="padding: 5px 10px;">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <button class="btn btn-primary" style="margin-top: 15px;" onclick="openModal('user-modal')">
-                            <i class="fas fa-plus"></i> Add User
-                        </button>
-                    </div>
-                    
-                    <div class="tab-content" id="github">
-                        <h3>GitHub Data Sync</h3>
-                        <div class="github-sync">
-                            <p>Sync your data with GitHub to make it accessible from any device:</p>
-                            
-                            <div class="form-group">
-                                <label for="github-repo">GitHub Repository</label>
-                                <input type="text" id="github-repo" placeholder="username/repo-name">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="github-token">GitHub Access Token</label>
-                                <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" value="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">
-                                <small>Create a token with "repo" permissions in GitHub settings</small>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="github-filename">Data Filename</label>
-                                <input type="text" id="github-filename" value="transport-data.json">
-                            </div>
-                            
-                            <div id="sync-status" class="sync-status sync-pending">
-                                <i class="fas fa-sync"></i> Sync not performed yet
-                            </div>
-                            
-                            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                                <button class="btn btn-primary" onclick="saveToGitHub()">
-                                    <i class="fas fa-cloud-upload-alt"></i> Save to GitHub
-                                </button>
-                                <button class="btn btn-success" onclick="loadFromGitHub()">
-                                    <i class="fas fa-cloud-download-alt"></i> Load from GitHub
-                                </button>
-                            </div>
-                            
-                            <div style="margin-top: 20px;">
-                                <h4>How to set up:</h4>
-                                <ol style="text-align: left; margin-left: 20px;">
-                                    <li>Create a new repository on GitHub</li>
-                                    <li>Generate a personal access token with "repo" permissions</li>
-                                    <li>Enter your repository name (username/repo-name)</li>
-                                    <li>Enter your access token</li>
-                                    <li>Click "Save to GitHub" to upload your data</li>
-                                </ol>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="tab-content" id="settings">
-                        <h3>Application Settings</h3>
-                        <div class="form-group">
-                            <label for="currency">Currency</label>
-                            <select id="currency" class="form-control">
-                                <option value="€">Euro (€)</option>
-                                <option value="$">Dollar ($)</option>
-                                <option value="£">Pound (£)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="distance-unit">Distance Unit</label>
-                            <select id="distance-unit" class="form-control">
-                                <option value="km">Kilometers</option>
-                                <option value="mi">Miles</option>
-                            </select>
-                        </div>
-                        <button class="btn btn-primary" onclick="saveSettings()">
-                            Save Settings
-                        </button>
-                    </div>
-                </div>
-            `;
+            document.getElementById('main-content').innerHTML = content;
         }
+        
+        // Other view loading functions would be similar in structure
+        
+        // Tab switching
+        function setupTabSwitching(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show active content
+                    container.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    container.querySelector(`#${tabName}`).classList.add('active');
+                });
+            });
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+            
+            // Initialize file uploads
+            document.getElementById('tender-upload-area').addEventListener('click', function() {
+                document.getElementById('tender-file').click();
+            });
+            
+            document.getElementById('invoice-upload-area').addEventListener('click', function() {
+                document.getElementById('invoice-file').click();
+            });
+            
+            // Notification and chat icons
+            document.getElementById('notification-icon').addEventListener('click', toggleNotificationPanel);
+            document.getElementById('chat-icon').addEventListener('click', toggleChatPanel);
+            
+            // Initialize demo data if needed
+            initDemoData();
+            initApp();
+        });
+        
+        // Notification functions
+        function toggleNotificationPanel() {
+            const panel = document.getElementById('notification-panel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        function closeNotificationPanel() {
+            document.getElementById('notification-panel').style.display = 'none';
+        }
+        
+        function renderNotifications() {
+            const container = document.getElementById('notification-list');
+            container.innerHTML = appState.notifications.map(notification => `
+                <div class="notification-item ${notification.read ? '' : 'unread'}" onclick="markNotificationRead(${notification.id})">
+                    <div class="notification-title">
+                        <i class="fas fa-${notification.type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                        ${notification.title}
+                    </div>
+                    <div class="notification-message">${notification.message}</div>
+                    <div class="notification-time">${new Date(notification.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        
+        function updateNotificationBadge() {
+            const unread = appState.notifications.filter(n => !n.read).length;
+            document.getElementById('notification-count').textContent = unread;
+        }
+        
+        // Chat functions
+        function toggleChatPanel() {
+            const panel = document.getElementById('chat-panel');
+            panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+        }
+        
+        function closeChatPanel() {
+            document.getElementById('chat-panel').style.display = 'none';
+        }
+        
+        function renderChatMessages() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = appState.chatMessages.map(msg => `
+                <div class="message ${msg.sender === appState.currentUser.name ? 'sent' : 'received'}">
+                    <div class="message-sender">${msg.sender}</div>
+                    <div class="message-text">${msg.message}</div>
+                    <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</div>
+                </div>
+            `).join('');
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (message) {
+                appState.chatMessages.push({
+                    id: Date.now(),
+                    sender: appState.currentUser.name,
+                    message: message,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Save to localStorage
+                saveAppData({
+                    ...loadAppData(),
+                    chatMessages: appState.chatMessages
+                });
+                
+                // Update UI
+                renderChatMessages();
+                input.value = '';
+            }
+        }
+        
+        // PDF Generation
+        function generatePDFReport(type) {
+            // Use jsPDF to generate PDF report
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.text(`${type} Report - Transport Manager Pro`, 10, 10);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 10, 20);
+            
+            // Add charts and tables (simplified)
+            doc.text("Performance Overview", 10, 40);
+            doc.text("Driver Performance", 10, 80);
+            doc.text("Financial Summary", 10, 120);
+            
+            // Save the PDF
+            doc.save(`${type}_report_${new Date().getTime()}.pdf`);
+        }
+        
+        // Vehicle inspection tracking
+        function checkExpiringInspections() {
+            const today = new Date();
+            const { vehicles } = loadAppData();
+            
+            vehicles.forEach(vehicle => {
+                const inspectionDate = new Date(vehicle.inspectionExpiry);
+                const diff = Math.ceil((inspectionDate - today) / (1000 * 60 * 60 * 24));
+                
+                if (diff <= vehicle.alertDays && diff > 0) {
+                    addNotification(
+                        "Vehicle Inspection", 
+                        `Inspection for ${vehicle.type} ${vehicle.regNumber} expires in ${diff} days`,
+                        "warning"
+                    );
+                } else if (diff <= 0) {
+                    addNotification(
+                        "Vehicle Inspection Expired", 
+                        `Inspection for ${vehicle.type} ${vehicle.regNumber} has expired!`,
+                        "danger"
+                    );
+                }
+            });
+        }
+        
+        function addNotification(title, message, type) {
+            const notification = {
+                id: Date.now(),
+                title: title,
+                message: message,
+                type: type,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            appState.notifications.unshift(notification);
+            updateNotificationBadge();
+            renderNotifications();
+            
+            // Save to localStorage
+            saveAppData({
+                ...loadAppData(),
+                notifications: appState.notifications
+            });
+        }
+        
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const { users } = loadAppData();
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                appState.currentUser = user;
+                
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                document.getElementById('current-user').textContent = user.name;
+                document.getElementById('current-role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+                
+                // Load the dashboard view
+                loadView('dashboard');
+            } else {
+                alert('Invalid credentials. Please try again.');
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            document.getElementById('app-container').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            appState.currentUser = null;
+        }
+        
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Initialize tab switching for modals
+        document.querySelectorAll('.tabs').forEach(tabContainer => {
+            tabContainer.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    const modal = this.closest('.modal-content');
+                    
+                    // Update active tab
+                    this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show active content
+                    modal.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    modal.querySelector(`#${tabName}`).classList.add('active');
+                });
+            });
+        });
     </script>
 </body>
 </html>
