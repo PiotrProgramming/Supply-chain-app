@@ -1,1 +1,25 @@
-
+<div class="content-section" id="payments-content">
+    <div class="section">
+        <div class="section-header">
+            <h2>Payment Management</h2>
+            <button class="btn btn-primary" onclick="openModal('payment-modal')">
+                <i class="fas fa-plus"></i> Add Payment
+            </button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Tender ID</th>
+                    <th>Amount</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="payments-list">
+                <!-- Payments will be populated here -->
+            </tbody>
+        </table>
+    </div>
+</div>
