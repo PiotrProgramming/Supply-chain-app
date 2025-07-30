@@ -1,1 +1,103 @@
-
+<div class="content-section" id="reports-content">
+    <div class="section">
+        <div class="section-header">
+            <h2>Performance Reports</h2>
+            <div>
+                <button class="btn btn-primary" onclick="generateReport('weekly')">
+                    <i class="fas fa-download"></i> Weekly Report
+                </button>
+                <button class="btn btn-success" style="margin-left: 10px;" onclick="generateReport('monthly')">
+                    <i class="fas fa-download"></i> Monthly Report
+                </button>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="driver-reports">Driver Reports</div>
+            <div class="tab" data-tab="fleet-reports">Fleet Reports</div>
+            <div class="tab" data-tab="financial-reports">Financial Reports</div>
+        </div>
+        
+        <div class="tab-content active" id="driver-reports">
+            <h3>Driver Performance</h3>
+            <div class="chart-container">
+                <canvas id="driver-performance-chart"></canvas>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Driver</th>
+                        <th>Tenders</th>
+                        <th>Total Km</th>
+                        <th>Avg. Load %</th>
+                        <th>Revenue</th>
+                        <th>€/Km</th>
+                    </tr>
+                </thead>
+                <tbody id="driver-performance-data">
+                    <!-- Driver performance data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="tab-content" id="fleet-reports">
+            <h3>Fleet Utilization</h3>
+            <div class="chart-container">
+                <canvas id="fleet-utilization-chart"></canvas>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody id="fleet-utilization-data">
+                    <tr>
+                        <td>Total Kilometers</td>
+                        <td id="total-km">0 km</td>
+                    </tr>
+                    <tr>
+                        <td>Average Load Percentage</td>
+                        <td id="avg-load">0%</td>
+                    </tr>
+                    <tr>
+                        <td>Revenue per Kilometer</td>
+                        <td id="revenue-per-km">€0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="tab-content" id="financial-reports">
+            <h3>Revenue Overview</h3>
+            <div class="chart-container">
+                <canvas id="revenue-chart"></canvas>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Revenue</th>
+                        <th>Expenses</th>
+                        <th>Profit</th>
+                    </tr>
+                </thead>
+                <tbody id="financial-data">
+                    <tr>
+                        <td>This Week</td>
+                        <td id="week-revenue">€0</td>
+                        <td id="week-expenses">€0</td>
+                        <td id="week-profit">€0</td>
+                    </tr>
+                    <tr>
+                        <td>This Month</td>
+                        <td id="month-revenue">€0</td>
+                        <td id="month-expenses">€0</td>
+                        <td id="month-profit">€0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
