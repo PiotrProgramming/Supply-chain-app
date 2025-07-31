@@ -1,0 +1,97 @@
+:root {
+  --bg-primary: #121212;
+  --bg-secondary: #1E1E1E;
+  --accent: #E63946;
+  --text-primary: #FFFFFF;
+  --text-secondary: #BBBBBB;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.container, .dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.logo {
+  width: 100px;
+  height: auto;
+}
+
+button {
+  background: var(--accent);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: darken(var(--accent), 10%);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-secondary);
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid var(--text-secondary);
+  text-align: left;
+}
+
+header {
+  background: var(--bg-secondary);
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+aside {
+  width: 200px;
+  background: var(--bg-secondary);
+  padding: 20px;
+  float: left;
+}
+
+main {
+  margin-left: 220px;
+  padding: 20px;
+}
+
+footer {
+  text-align: center;
+  padding: 10px;
+  background: var(--bg-secondary);
+}
+
+.notification-bell {
+  position: relative;
+}
+
+.notification-bell span {
+  background: var(--accent);
+  border-radius: 50%;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  padding: 3px 7px;
+  font-size: 12px;
+}
+
+/* Drag-drop styles */
+.drag-container {
+  background: var(--bg-secondary);
+  padding: 10px;
+  min-height: 100px;
+}
