@@ -6,14 +6,74 @@
   <title>TransForge™ - GitHub Setup</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/main.css">
+  <style>
+    .alert {
+      padding: 12px 20px;
+      border-radius: 4px;
+      margin: 15px 0;
+      font-weight: 500;
+    }
+    .alert-info {
+      background-color: #e3f2fd;
+      color: #1976d2;
+      border-left: 4px solid #1976d2;
+    }
+    .alert-success {
+      background-color: #e8f5e9;
+      color: #388e3c;
+      border-left: 4px solid #388e3c;
+    }
+    .alert-warning {
+      background-color: #fff8e1;
+      color: #f57f17;
+      border-left: 4px solid #f57f17;
+    }
+    .alert-danger {
+      background-color: #ffebee;
+      color: #d32f2f;
+      border-left: 4px solid #d32f2f;
+    }
+    .github-step {
+      display: flex;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+    }
+    .step-number {
+      background: #4361ee;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn i {
+      margin-right: 0;
+    }
+    .mt-3 {
+      margin-top: 1.5rem;
+    }
+  </style>
 </head>
 <body>
   <div class="login-container">
     <div class="login-left">
       <div class="login-hero">
         <h1>Connect to GitHub</h1>
-        <p>Securely store your company data in a private repository.</p>
-        <div style="text-align:center;margin-top:2rem;">
+        <p>Securely store your company data in a private repository</p>
+        <div class="github-icon">
           <i class="fab fa-github fa-5x"></i>
         </div>
       </div>
@@ -21,51 +81,50 @@
     <div class="login-right">
       <div class="github-setup">
         <h2><i class="fab fa-github"></i> GitHub Setup</h2>
-        
-        <!-- Token Validation Section -->
-        <div class="validation-section">
-          <h3>Step 1: Validate Your Token</h3>
-          <div class="form-group">
-            <label>GitHub Personal Access Token</label>
-            <input type="text" id="githubToken" placeholder="Paste token here" required>
-          </div>
-          <button id="validateTokenBtn" class="btn btn-secondary">
-            <i class="fas fa-shield-alt"></i> Validate Token
-          </button>
-          <div id="tokenValidationResult" class="mt-2"></div>
-        </div>
-        
-        <!-- Repository Setup Section -->
-        <div class="repo-setup-section" style="display:none;">
-          <h3 class="mt-3">Step 2: Repository Configuration</h3>
-          <div class="form-group">
-            <label>Repository Name</label>
-            <input type="text" id="repoName" placeholder="transforge-company-data" value="transforge-company-data" required>
-            <small>Must be unique (only lowercase letters, numbers, and hyphens)</small>
-          </div>
-          
-          <div class="github-steps">
-            <div class="github-step">
-              <div class="step-number">1</div>
-              <div>
-                <h4>Repository Name Rules</h4>
-                <ul>
-                  <li>Must be unique across all GitHub</li>
-                  <li>Only lowercase letters, numbers, and hyphens</li>
-                  <li>No spaces or special characters</li>
-                </ul>
-              </div>
+        <div class="github-steps">
+          <div class="github-step">
+            <div class="step-number">1</div>
+            <div>
+              <h3>Create GitHub Account</h3>
+              <p><a href="https://github.com/join" target="_blank">Sign up for GitHub</a> if you don't have an account</p>
             </div>
           </div>
-          
-          <button id="setupGitHubBtn" class="btn btn-primary">
-            <i class="fab fa-github"></i> Create Repository & Setup Data
-          </button>
-          <div id="setupStatus" class="mt-3"></div>
-        </div>
+          <div class="github-step">
+            <div class="step-number">2</div>
+            <div>
+              <h3>Generate Access Token</h3>
+              <p>Go to <strong>Settings → Developer Settings → Personal Access Tokens → Generate New Token</strong></p>
+              <p>Select <code>repo</code> permissions and enable <code>admin:repo_hook</code></p>
+              <button class="btn btn-secondary" id="tokenGuideBtn">
+                <i class="fas fa-book"></i> Token Creation Guide
+              </button>
+            </div>
+          <div class="github-step">
+            <div class="step-number">3</div>
+            <div>
+              <h3>Repository Configuration</h3>
+              <div class="form-group">
+                <label>GitHub Personal Access Token</label>
+                <input type="password" id="githubToken" placeholder="Paste token here" autocomplete="off" required>
+              </div>
+              <div class="form-group">
+                <label>Repository Name</label>
+                <input type="text" id="repoName" placeholder="transforge-company-data" value="transforge-company-data" required>
+                <small>Will be created as private repository</small>
+              </div>
         
-        <p style="text-align:center;margin-top:1rem;">
-          <a href="login.html" id="skipForNow">Skip for now (use local storage)</a>
+        <button id="validateTokenBtn" class="btn btn-info mb-2">
+          <i class="fas fa-check-circle"></i> Validate Token First
+        </button>
+        
+        <button id="setupGitHubBtn" class="btn btn-primary">
+          <i class="fas fa-cloud-upload-alt"></i> Create Repository & Initialize
+        </button>
+        
+        <div id="setupStatus" class="mt-3"></div>
+        
+        <p style="text-align:center;margin-top:1.5rem;">
+          <a href="#" id="skipForNow">Skip GitHub for now (use local storage)</a>
         </p>
       </div>
     </div>
@@ -73,230 +132,192 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const tokenValidationResult = document.getElementById('tokenValidationResult');
-      const repoSetupSection = document.querySelector('.repo-setup-section');
+      const statusDiv = document.getElementById('setupStatus');
       
+      // Token guide
+      document.getElementById('tokenGuideBtn').addEventListener('click', () => {
+        alert('1. Go to: github.com/settings/tokens\n\n' +
+              '2. Click "Generate new token" (classic)\n\n' +
+              '3. Name: "TransForge Access"\n\n' +
+              '4. Select these scopes:\n' +
+              '   - repo (full control)\n' +
+              '   - admin:repo_hook (manage hooks)\n\n' +
+              '5. Click "Generate token" and COPY immediately');
+      });
+
       // Token validation
       document.getElementById('validateTokenBtn').addEventListener('click', async () => {
         const token = document.getElementById('githubToken').value.trim();
         if (!token) {
-          tokenValidationResult.innerHTML = '<div class="alert alert-danger">Please enter a token</div>';
+          statusDiv.innerHTML = '<div class="alert alert-danger">Please enter a token first</div>';
           return;
         }
-        
-        const btn = document.getElementById('validateTokenBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validating...';
-        tokenValidationResult.innerHTML = '<div class="alert alert-info">Checking token permissions...</div>';
-        
+
+        statusDiv.innerHTML = '<div class="alert alert-info">Validating token...</div>';
         try {
-          // Step 1: Check token validity
-          const userResponse = await fetch('https://api.github.com/user', {
+          const userRes = await fetch('https://api.github.com/user', {
             headers: { Authorization: `token ${token}` }
           });
-          
-          if (!userResponse.ok) {
-            const error = await userResponse.json();
-            throw new Error(`Invalid token: ${error.message || 'Unauthorized'}`);
+
+          if (!userRes.ok) {
+            const error = await userRes.json();
+            throw new Error(`Invalid token: ${error.message || 'Authentication failed'}`);
           }
-          
-          const user = await userResponse.json();
-          
-          // Step 2: Check required permissions
-          const headers = userResponse.headers;
-          const scopes = headers.get('X-OAuth-Scopes') || '';
-          
-          tokenValidationResult.innerHTML = `
+
+          const user = await userRes.json();
+          statusDiv.innerHTML = `
             <div class="alert alert-success">
-              <i class="fas fa-user-check"></i> Token valid for user: <strong>${user.login}</strong>
-              <br>Scopes: ${scopes || 'No scopes'}
+              ✅ Token valid!<br>
+              User: ${user.login}<br>
+              ${user.name ? `Name: ${user.name}<br>` : ''}
+              ${user.email ? `Email: ${user.email}` : ''}
             </div>
           `;
           
-          // Check for required "repo" scope
-          if (!scopes.includes('repo')) {
-            tokenValidationResult.innerHTML += `
-              <div class="alert alert-warning mt-2">
-                <i class="fas fa-exclamation-triangle"></i> Warning: Your token is missing the "repo" scope.
-                <br>Required for private repository access.
-                <br><a href="#" id="tokenGuideLink" style="color:#0069d9;">View token creation guide</a>
-              </div>
-            `;
-            
-            document.getElementById('tokenGuideLink').addEventListener('click', (e) => {
-              e.preventDefault();
-              showTokenGuide();
-            });
+          // Check repo permissions
+          statusDiv.innerHTML += '<div class="alert alert-info">Checking repository permissions...</div>';
+          const scopesRes = await fetch('https://api.github.com/ user/installations', {
+            headers: { Authorization: `token ${token}` }
+          });
+          
+          if (!scopesRes.ok) {
+            statusDiv.innerHTML += `<div class="alert alert-warning">⚠️ Could not verify full permissions. Trying repository creation anyway.</div>`;
+          } else {
+            const scopes = scopesRes.headers.get('X-OAuth-Scopes')?.split(', ');
+            if (!scopes.includes('repo') || !scopes.includes('admin:repo_hook')) {
+              statusDiv.innerHTML += `
+                <div class="alert alert-warning">
+                  ⚠️ Missing required permissions:<br>
+                  - repo (full control)<br>
+                  - admin:repo_hook<br>
+                  Repository creation might fail!
+                </div>
+              `;
+            }
           }
-          
-          // Save token for later use
-          localStorage.setItem('pendingGitHubToken', token);
-          
-          // Show repository setup section
-          repoSetupSection.style.display = 'block';
           
         } catch (err) {
-          console.error('Token validation failed:', err);
-          tokenValidationResult.innerHTML = `
-            <div class="alert alert-danger">
-              <i class="fas fa-exclamation-circle"></i> Validation failed: ${err.message}
-              <br><small>Check browser console for details</small>
-              <br><a href="#" id="tokenGuideLink" style="color:#f8f9fa;">Need help creating token?</a>
-            </div>
-          `;
-          
-          document.getElementById('tokenGuideLink').addEventListener('click', (e) => {
-            e.preventDefault();
-            showTokenGuide();
-          });
-        } finally {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-shield-alt"></i> Validate Token';
+          console.error('Validation error:', err);
+          statusDiv.innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
         }
       });
-      
-      // Repository setup
+
+      // GitHub setup
       document.getElementById('setupGitHubBtn').addEventListener('click', async () => {
-        const token = localStorage.getItem('pendingGitHubToken');
+        const token = document.getElementById('githubToken').value.trim();
         const repo = document.getElementById('repoName').value.trim();
+        const btn = document.getElementById('setupGitHubBtn');
         const statusDiv = document.getElementById('setupStatus');
-        
+
         if (!token || !repo) {
-          statusDiv.innerHTML = '<div class="alert alert-danger">Token or repository name missing</div>';
+          statusDiv.innerHTML = '<div class="alert alert-danger">Please fill in all fields</div>';
           return;
         }
-        
-        const btn = document.getElementById('setupGitHubBtn');
+
+        // Reset UI
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Setting up...';
-        statusDiv.innerHTML = '<div class="alert alert-info">Starting setup process...</div>';
-        
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Repository...';
+        statusDiv.innerHTML = '';
+
         try {
-          // Get user info
-          const userResponse = await fetch('https://api.github.com/user', {
+          // 1. Get user info
+          statusDiv.innerHTML += '<div class="alert alert-info">Verifying GitHub identity...</div>';
+          const userRes = await fetch('https://api.github.com/user', {
             headers: { Authorization: `token ${token}` }
           });
           
-          if (!userResponse.ok) throw new Error('Failed to get user info');
-          const user = await userResponse.json();
+          if (!userRes.ok) {
+            const error = await userRes.json();
+            throw new Error(`Authentication failed: ${error.message || 'Invalid token'}`);
+          }
+          
+          const user = await userRes.json();
           const owner = user.login;
-          
-          // Check if repo name is valid
-          if (!/^[a-z0-9-]+$/.test(repo)) {
-            throw new Error('Invalid repository name. Use only lowercase letters, numbers, and hyphens.');
+
+          // 2. Validate repository name
+          statusDiv.innerHTML += '<div class="alert alert-info">Validating repository name...</div>';
+          if (!/^[a-z0-9](?:[a-z0-9]|-(?=[a-z0-9])){0,98}[a-z0-9]$/.test(repo)) {
+            throw new Error('Repository name must be lowercase, 1-100 characters, with only letters, numbers, and hyphens');
           }
-          
-          // Check if repo exists
-          statusDiv.innerHTML = '<div class="alert alert-info">Checking if repository exists...</div>';
-          const repoCheckResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+
+          // 3. Check if repo exists
+          statusDiv.innerHTML += '<div class="alert alert-info">Checking repository existence...</div>';
+          const repoCheckRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
             headers: { Authorization: `token ${token}` }
           });
-          
-          if (repoCheckResponse.ok) {
-            statusDiv.innerHTML = '<div class="alert alert-warning">Repository already exists. Using existing repository.</div>';
-          } else if (repoCheckResponse.status === 404) {
-            // Create repository
-            statusDiv.innerHTML = '<div class="alert alert-info">Creating new repository...</div>';
-            const createRepoResponse = await fetch('https://api.github.com/user/repos', {
-              method: 'POST',
-              headers: {
-                Authorization: `token ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                name: repo,
-                description: 'TransForge Transport Management Data',
-                private: true
-              })
-            });
-            
-            if (!createRepoResponse.ok) {
-              const error = await createRepoResponse.json();
-              throw new Error(`Repository creation failed: ${error.message || 'Unknown error'}`);
-            }
-            
-            // Wait for repo to initialize
-            statusDiv.innerHTML = '<div class="alert alert-info">Finalizing repository setup (this may take a few seconds)...</div>';
-            await new Promise(resolve => setTimeout(resolve, 3000));
-          } else {
-            const error = await repoCheckResponse.json();
-            throw new Error(`Repository check failed: ${error.message || 'HTTP ' + repoCheckResponse.status}`);
+
+          if (repoCheckRes.ok) {
+            throw new Error(`Repository already exists: https://github.com/${owner}/${repo}`);
           }
-          
-          // Create data directory if it doesn't exist
-          statusDiv.innerHTML = '<div class="alert alert-info">Creating data directory...</div>';
-          try {
-            await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data`, {
-              method: 'PUT',
-              headers: {
-                Authorization: `token ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                message: 'Create data directory',
-                content: btoa('This is a placeholder file for the data directory')
-              })
-            });
-          } catch (err) {
-            // Directory likely already exists - ignore
-            console.log('Data directory likely already exists:', err);
+
+          // 4. Create repository
+          statusDiv.innerHTML += '<div class="alert alert-info">Creating new repository...</div>';
+          const createRes = await fetch('https://api.github.com/user/repos', {
+            method: 'POST',
+            headers: {
+              Authorization: `token ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: repo,
+              private: true,
+              auto_init: false,  // We'll create files manually
+              has_issues: false,
+              has_projects: false,
+              has_wiki: false
+            })
+          });
+
+          if (!createRes.ok) {
+            const error = await createRes.json();
+            throw new Error(`Repository creation failed: ${error.message || 'GitHub API error'}`);
           }
-          
-          // Create data files
-          statusDiv.innerHTML = '<div class="alert alert-info">Creating data files...</div>';
+
+          // 5. Create data directory
+          statusDiv.innerHTML += '<div class="alert alert-info">Creating data directory...</div>';
+          await createGitHubDirectory(owner, repo, token);
+
+          // 6. Create data files
+          statusDiv.innerHTML += '<div class="alert alert-info">Initializing data files...</div>';
           const files = [
             'users.json', 'drivers.json', 'vehicles.json', 'tenders.json',
             'invoices.json', 'reports.json', 'chat.json', 'notifications.json'
           ];
-          
+
           for (const file of files) {
             try {
-              await createOrUpdateFile(owner, repo, token, file, []);
-              statusDiv.innerHTML = `<div class="alert alert-info">Created ${file}...</div>`;
+              await createGitHubFile(owner, repo, token, `data/${file}`, []);
             } catch (err) {
-              console.error(`Failed to create ${file}:`, err);
-              statusDiv.innerHTML = `<div class="alert alert-warning">Warning: Could not create ${file} (${err.message})</div>`;
+              console.warn(`File creation warning: ${file} - ${err.message}`);
+              statusDiv.innerHTML += `<div class="alert alert-warning">⚠️ ${file} initialization skipped: ${err.message}</div>`;
             }
           }
-          
-          // Save credentials
+
+          // 7. Save credentials
           localStorage.setItem('githubToken', token);
           localStorage.setItem('githubRepo', repo);
-          localStorage.removeItem('pendingGitHubToken');
           
-          // Save user
+          // 8. Create admin user
+          statusDiv.innerHTML += '<div class="alert alert-info">Creating admin user...</div>';
           const pendingUser = JSON.parse(localStorage.getItem('pendingUser'));
           pendingUser.isAdmin = true;
-          pendingUser.githubOwner = owner;
           
-          // Add user to users.json
-          statusDiv.innerHTML = '<div class="alert alert-info">Adding user to database...</div>';
-          const users = await getGitHubFile(owner, repo, token, 'users.json');
+          const users = await getGitHubFile(owner, repo, token, 'data/users.json');
           users.push(pendingUser);
-          await createOrUpdateFile(owner, repo, token, 'users.json', users);
-          
-          localStorage.setItem('transforge_user', JSON.stringify(pendingUser));
-          localStorage.removeItem('pendingUser');
-          
-          // Success!
-          statusDiv.innerHTML = '<div class="alert alert-success">✅ Setup complete! Redirecting to dashboard...</div>';
-          setTimeout(() => {
-            window.location.href = 'dashboard.html';
-          }, 1500);
-          
+          await createGitHubFile(owner, repo, token, 'data/users.json', users);
+
+          // Success
+          statusDiv.innerHTML += '<div class="alert alert-success">✅ Setup complete! Redirecting to dashboard...</div>';
+          setTimeout(() => window.location.href = 'dashboard.html', 2000);
+
         } catch (err) {
-          console.error('GitHub setup failed:', err);
-          statusDiv.innerHTML = `
-            <div class="alert alert-danger">
-              <i class="fas fa-exclamation-circle"></i> Setup failed: ${err.message}
-              <br><small>Check browser console for detailed error</small>
-            </div>
-          `;
+          console.error('Setup failed:', err);
+          statusDiv.innerHTML += `<div class="alert alert-danger">❌ ${err.message}</div>`;
           btn.disabled = false;
-          btn.innerHTML = '<i class="fab fa-github"></i> Create Repository & Setup Data';
+          btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Try Again';
         }
       });
-      
+
       // Skip to local storage
       document.getElementById('skipForNow').addEventListener('click', (e) => {
         e.preventDefault();
@@ -316,75 +337,41 @@
           window.location.href = 'dashboard.html';
         } catch (err) {
           console.error('Local setup failed:', err);
-          alert('Failed to create local account');
+          statusDiv.innerHTML += `<div class="alert alert-danger">❌ Local setup failed: ${err.message}</div>`;
         }
       });
-      
-      // Helper functions
+
+      // GitHub API helpers
       async function getGitHubFile(owner, repo, token, path) {
-        const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data/${path}`, {
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
           headers: { Authorization: `token ${token}` }
         });
         
-        if (response.status === 404) {
-          return [];
-        }
+        if (res.status === 404) return [];
+        if (!res.ok) throw new Error(`File read error: ${res.status} ${res.statusText}`);
         
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
+        const data = await res.json();
         return JSON.parse(atob(data.content));
       }
 
-      async function createOrUpdateFile(owner, repo, token, path, content) {
-        // First, check if the data directory exists
-        let dirCheck;
-        try {
-          dirCheck = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data`, {
-            headers: { Authorization: `token ${token}` }
-          });
-        } catch (err) {
-          console.log('Error checking data directory:', err);
-        }
-        
-        if (!dirCheck || !dirCheck.ok) {
-          // Create data directory if it doesn't exist
-          try {
-            await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data/.gitkeep`, {
-              method: 'PUT',
-              headers: {
-                Authorization: `token ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                message: 'Create data directory',
-                content: btoa('')
-              })
-            });
-          } catch (err) {
-            console.log('Could not create data directory:', err);
-          }
-        }
-        
-        // Now create the file
+      async function createGitHubFile(owner, repo, token, path, content) {
         let sha = null;
         
+        // Check if file exists
         try {
-          const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data/${path}`, {
+          const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
             headers: { Authorization: `token ${token}` }
           });
           
-          if (response.ok) {
-            const data = await response.json();
+          if (res.ok) {
+            const data = await res.json();
             sha = data.sha;
           }
         } catch (err) {
-          // File doesn't exist yet
+          // File doesn't exist
         }
         
-        const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data/${path}`, {
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
           method: 'PUT',
           headers: {
             Authorization: `token ${token}`,
@@ -397,35 +384,15 @@
           })
         });
         
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(`HTTP ${response.status}: ${error.message || 'Unknown error'}`);
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(`File creation failed: ${error.message || res.statusText}`);
         }
       }
-      
-      function showTokenGuide() {
-        alert(`GitHub Token Creation Guide:
-        
-1. Go to GitHub → Settings → Developer Settings
-2. Click "Personal Access Tokens" → "Tokens (classic)"
-3. Click "Generate new token"
-4. Give it a name like "TransForge Access"
-5. Select ONLY the "repo" scope (critical!)
-6. Click "Generate token"
-7. COPY THE TOKEN IMMEDIATELY (you can't see it again)
-        
-Important: 
-- Use "Tokens (classic)" not "Fine-grained tokens"
-- Make sure "repo" scope is selected
-- Don't share your token with anyone`);
-      }
-      
-      // Initialize token guide link if it exists
-      if (document.getElementById('tokenGuideLink')) {
-        document.getElementById('tokenGuideLink').addEventListener('click', (e) => {
-          e.preventDefault();
-          showTokenGuide();
-        });
+
+      async function createGitHubDirectory(owner, repo, token) {
+        // GitHub doesn't have a direct directory API, so create a placeholder file
+        await createGitHubFile(owner, repo, token, 'data/.gitkeep', '');
       }
     });
   </script>
