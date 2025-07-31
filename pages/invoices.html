@@ -1,0 +1,10 @@
+<div class="page">
+  <h2>Invoice Management</h2>
+  <button onclick="Invoices.create()">Add Invoice</button>
+  <table>
+    <thead><tr><th>Client</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody id="invoicesTable"></tbody>
+  </table>
+  <script src="../assets/js/invoices.js"></script>
+  <script>Invoices.load();</script>
+</div>
