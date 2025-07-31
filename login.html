@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TransForge™ - Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-left">
+      <div class="login-hero">
+        <h1>TransForge™</h1>
+        <p>Professional Transport & Forwarding Management</p>
+        <div class="features-grid">
+          <div><i class="fas fa-truck"></i> Driver & Vehicle Mgmt</div>
+          <div><i class="fas fa-file-invoice"></i> Tenders & Invoices</div>
+          <div><i class="fas fa-chart-bar"></i> Real-time Reports</div>
+          <div><i class="fas fa-comments"></i> Team Chat</div>
+        </div>
+      </div>
+    </div>
+    <div class="login-right">
+      <div class="login-form">
+        <h2><i class="fas fa-sign-in-alt"></i> Sign In</h2>
+        <form id="loginForm">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Sign In</button>
+          <p>Don't have an account? <a href="register.html" class="link-primary">Register now</a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Handle login
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const pw = document.getElementById('loginPassword').value;
+        
+        // Try GitHub storage first
+        try {
+          const users = await API.get('users.json');
+          const user = users.find(u => u.email === email && u.password === pw);
+          
+          if (user) {
+            localStorage.setItem('transforge_user', JSON.stringify(user));
+            window.location.href = 'dashboard.html';
+            return;
+          }
+        } catch (err) {
+          console.log("GitHub storage not available, trying local storage");
+        }
+        
+        // Fall back to local storage
+        const localUsers = JSON.parse(localStorage.getItem('transforge_data_users') || '[]');
+        const localUser = localUsers.find(u => u.email === email && u.password === pw);
+        
+        if (localUser) {
+          localStorage.setItem('transforge_user', JSON.stringify(localUser));
+          window.location.href = 'dashboard.html';
+        } else {
+          alert('Invalid credentials');
+        }
+      });
+      
+      // API helper (for login check)
+      const API = {
+        async get(file) {
+          const token = localStorage.getItem('githubToken');
+          const repo = localStorage.getItem('githubRepo');
+          if (!token || !repo) throw new Error('No GitHub credentials');
+          
+          const res = await fetch(`https://api.github.com/repos/${await this.getOwner()}/${repo}/contents/data/${file}`, {
+            headers: { Authorization: `token ${token}` }
+          });
+          
+          if (!res.ok) throw new Error('File not found');
+          
+          const data = await res.json();
+          return JSON.parse(atob(data.content));
+        },
+        
+        async getOwner() {
+          const token = localStorage.getItem('githubToken');
+          const res = await fetch('https://api.github.com/user', {
+            headers: { Authorization: `token ${token}` }
+          });
+          const user = await res.json();
+          return user.login;
+        }
+      };
+    });
+  </script>
+</body>
+</html>
