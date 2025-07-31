@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (res.ok) {
             const data = await res.json();
             return JSON.parse(atob(data.content));
+          } else if (res.status === 404) {
+            // File doesn't exist, return empty array
+            return [];
           }
         } catch (err) {
           console.log(`GitHub get failed for ${file}:`, err);
@@ -56,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({
               message: `Update ${file}`,
-              content: btoa(JSON.stringify(content)),
+              content: btoa(JSON.stringify(content, null, 2)),
               sha: sha
             })
           });
