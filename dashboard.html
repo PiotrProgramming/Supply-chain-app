@@ -1,64 +1,59 @@
+<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>TransForge™ - Dashboard</title>
-  <link rel="stylesheet" href="assets/css/main.css">
-  <script src="assets/js/app.js" defer></script>
+  <link rel="stylesheet" href="assets/css/main.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="assets/js/main.js" defer></script>
 </head>
 <body>
-  <div class="app">
+  <div class="dashboard-container">
+    <!-- Sidebar -->
     <aside class="sidebar">
-      <h1>TransForge™</h1>
-      <div class="company-name" id="companyName">Your Company</div>
+      <div class="logo-section">
+        <img src="assets/images/logo.svg" alt="Logo" style="width: 40px; margin-bottom: 0.5rem;" />
+        <h2>TransForge™</h2>
+        <p class="company-name" id="companyName">YourCompany</p>
+      </div>
       <ul class="nav-menu">
-        <li class="nav-item active" data-page="dashboard">
-          <i class="fas fa-tachometer-alt"></i> Dashboard
-        </li>
-        <li class="nav-item" data-page="drivers">
-          <i class="fas fa-users"></i> Drivers
-        </li>
-        <li class="nav-item" data-page="tenders">
-          <i class="fas fa-file-contract"></i> Tenders
-        </li>
-        <li class="nav-item" data-page="invoices">
-          <i class="fas fa-file-invoice-dollar"></i> Invoices
-        </li>
-        <li class="nav-item" data-page="reports">
-          <i class="fas fa-chart-bar"></i> Reports
-        </li>
-        <li class="nav-item" data-page="admin" id="adminMenuItem" style="display:none;">
-          <i class="fas fa-cog"></i> Admin
-        </li>
-        <li class="nav-item" data-page="chat">
-          <i class="fas fa-comments"></i> Chat
-        </li>
-        <li class="nav-item" data-page="notifications">
-          <i class="fas fa-bell"></i> Notifications
-        </li>
+        <li class="nav-item active" data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
+        <li class="nav-item" data-page="drivers"><i class="fas fa-users"></i> Drivers & Vehicles</li>
+        <li class="nav-item" data-page="tenders"><i class="fas fa-truck"></i> Tenders</li>
+        <li class="nav-item" data-page="invoices"><i class="fas fa-file-invoice-dollar"></i> Invoices</li>
+        <li class="nav-item" data-page="reports"><i class="fas fa-chart-bar"></i> Reports</li>
+        <li class="nav-item" data-page="admin"><i class="fas fa-cog"></i> Admin</li>
+        <li class="nav-item" data-page="chat"><i class="fas fa-comments"></i> Chat</li>
+        <li class="nav-item" data-page="notifications"><i class="fas fa-bell"></i> Notifications</li>
+        <li class="nav-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</li>
       </ul>
     </aside>
-    <div class="content">
-      <header class="header">
-        <div class="header-left">
-          <div class="app-title">Dashboard</div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 id="pageTitle">Dashboard</h1>
         </div>
-        <div class="header-right">
-          <div class="notification-badge">
+        <div class="topbar-right">
+          <div class="notif-bell" onclick="loadPage('notifications')">
             <i class="fas fa-bell"></i>
-            <span class="badge" id="notifCount">0</span>
+            <span class="notif-count" id="notifCount">0</span>
           </div>
-          <div class="user-profile">
-            <img src="https://ui-avatars.com/api/?name=User&background=2c3e50&color=fff" alt="User" class="avatar">
-            <span id="userName">User</span>
+          <div class="user-box">
+            <span class="user-email" id="userEmail">user@email.com</span>
+            <img src="https://ui-avatars.com/api/?name=User&background=2c3e50&color=fff" alt="User" class="avatar" />
           </div>
         </div>
       </header>
-      <main id="pageContent">
-        <!-- Pages will load here -->
-      </main>
-    </div>
+
+      <!-- Dynamic Page Container -->
+      <section class="page-container" id="pageContainer">
+        <!-- Pages will be dynamically injected here -->
+      </section>
+    </main>
   </div>
 </body>
 </html>
