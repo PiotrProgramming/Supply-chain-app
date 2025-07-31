@@ -1,218 +1,307 @@
-<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TransForge™ - Dashboard</title>
+  <title>TransForge™ - Transport Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.css">
   <style>
     :root {
       --primary: #2c3e50;
       --secondary: #3498db;
       --success: #27ae60;
+      --warning: #f39c12;
       --danger: #e74c3c;
       --light: #ecf0f1;
       --dark: #34495e;
       --gray: #95a5a6;
-      --sidebar-width: 250px;
+      --sidebar-width: 280px;
+      --card-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      --transition: all 0.3s ease;
     }
     
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', system-ui, sans-serif;
     }
     
     body {
-      background-color: #f5f7fa;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
       color: #333;
-    }
-    
-    .app-container {
-      display: flex;
       min-height: 100vh;
+      display: flex;
     }
     
+    /* Sidebar */
     .sidebar {
       width: var(--sidebar-width);
-      background: var(--primary);
+      background: linear-gradient(180deg, var(--primary), #1a2530);
       color: white;
       height: 100vh;
       position: fixed;
-      top: 0;
-      left: 0;
-      overflow-y: auto;
-      transition: all 0.3s ease;
+      padding: 1.5rem 0;
+      transition: var(--transition);
+      box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+      z-index: 100;
     }
     
-    .sidebar .logo-section {
-      padding: 1.5rem;
+    .logo-container {
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem 1.5rem;
       border-bottom: 1px solid rgba(255,255,255,0.1);
-      text-align: center;
     }
     
-    .sidebar .nav-menu {
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--secondary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      font-size: 1.5rem;
+    }
+    
+    .logo-text {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    
+    .company-name {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+    
+    .nav-menu {
       list-style: none;
-      padding: 1rem 0;
+      padding: 1.5rem 0;
     }
     
-    .sidebar .nav-item {
-      padding: 0.8rem 1.5rem;
+    .nav-item {
+      padding: 0.9rem 1.5rem;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: var(--transition);
       display: flex;
       align-items: center;
       border-left: 3px solid transparent;
+      position: relative;
     }
     
-    .sidebar .nav-item:hover, .sidebar .nav-item.active {
-      background: rgba(255,255,255,0.1);
+    .nav-item:hover {
+      background: rgba(255,255,255,0.08);
+    }
+    
+    .nav-item.active {
+      background: rgba(52, 152, 219, 0.15);
       border-left: 3px solid var(--secondary);
     }
     
-    .sidebar .nav-item i {
-      margin-right: 10px;
+    .nav-item i {
+      margin-right: 12px;
       width: 20px;
       text-align: center;
+      font-size: 1.1rem;
     }
     
-    .content {
-      margin-left: var(--sidebar-width);
+    .nav-badge {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--danger);
+      color: white;
+      font-size: 0.7rem;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Main Content */
+    .main-content {
       flex: 1;
-      padding: 1rem;
-      transition: all 0.3s ease;
+      margin-left: var(--sidebar-width);
+      padding: 1.5rem;
+      transition: var(--transition);
     }
     
     .header {
-      background: white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      padding: 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    
-    .app-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--primary);
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
     }
     
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 1.2rem;
+    }
+    
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .search-bar input {
+      border: none;
+      background: transparent;
+      padding: 0.5rem;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    
+    .notification-btn {
+      position: relative;
+      cursor: pointer;
+      font-size: 1.2rem;
     }
     
     .notification-badge {
-      position: relative;
-      cursor: pointer;
-    }
-    
-    .badge {
       position: absolute;
-      top: -8px;
-      right: -8px;
+      top: -6px;
+      right: -6px;
       background: var(--danger);
       color: white;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       font-size: 0.7rem;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .user-profile {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.8rem;
       cursor: pointer;
     }
     
     .avatar {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--secondary);
     }
     
-    .user-name {
-      color: var(--primary);
-      font-weight: 500;
+    .username {
+      font-weight: 600;
+      color: var(--dark);
     }
     
-    .user-role {
-      font-size: 0.8rem;
-      color: var(--gray);
-    }
-    
-    .page-content {
-      margin-top: 1rem;
-    }
-    
-    .dashboard {
+    /* Dashboard Grid */
+    .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
-    }
-    
-    .card {
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      padding: 1.5rem;
-      transition: transform 0.3s ease;
-    }
-    
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      margin-bottom: 2rem;
     }
     
     .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
       display: flex;
       flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    
+    .stat-icon {
+      position: absolute;
+      top: -15px;
+      right: 15px;
+      font-size: 3rem;
+      opacity: 0.15;
     }
     
     .stat-value {
-      font-size: 2.5rem;
-      font-weight: bold;
-      margin: 10px 0;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+      color: var(--primary);
     }
     
     .stat-label {
       color: var(--gray);
+      font-size: 0.95rem;
+      margin-bottom: 0.8rem;
+    }
+    
+    .stat-trend {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       font-size: 0.9rem;
     }
     
-    .stat-icon {
-      align-self: flex-end;
-      font-size: 2.5rem;
-      opacity: 0.2;
+    .trend-up {
+      color: var(--success);
     }
     
-    .management-header {
+    .trend-down {
+      color: var(--danger);
+    }
+    
+    /* Page Content */
+    .page-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.8rem;
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+      color: var(--primary);
+      font-weight: 700;
+    }
+    
+    .page-actions {
+      display: flex;
+      gap: 0.8rem;
     }
     
     .btn {
-      padding: 0.6rem 1.2rem;
-      border-radius: 5px;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.3s ease;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
     }
     
     .btn-primary {
@@ -220,717 +309,346 @@
       color: white;
     }
     
-    .btn-primary:hover {
-      background: darken(var(--secondary), 10%);
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--secondary);
+      color: var(--secondary);
     }
     
-    .table-container {
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .btn-warning {
+      background: var(--warning);
+      color: white;
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    
+    .section {
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      padding: 1.8rem;
+      margin-bottom: 2rem;
+    }
+    
+    .section-title {
+      font-size: 1.2rem;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 2px solid var(--light);
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    
+    /* Tables */
+    .table-responsive {
       overflow-x: auto;
     }
     
-    table {
+    .data-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1rem;
+      min-width: 600px;
     }
     
-    th, td {
+    .data-table th {
+      background: var(--light);
       padding: 1rem;
       text-align: left;
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .data-table td {
+      padding: 1rem;
       border-bottom: 1px solid #eee;
     }
     
-    th {
-      background: #f8f9fa;
-      font-weight: 600;
+    .data-table tr:hover {
+      background: rgba(52, 152, 219, 0.05);
     }
     
-    tr:hover {
-      background: #f8f9fa;
-    }
-    
-    .status {
-      padding: 0.3rem 0.6rem;
+    .status-badge {
+      padding: 0.4rem 0.8rem;
       border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.85rem;
+      font-weight: 500;
     }
     
     .status-available {
-      background: #d5f5e3;
-      color: #27ae60;
+      background: rgba(39, 174, 96, 0.15);
+      color: var(--success);
     }
     
-    .status-on-delivery {
-      background: #d6eaf8;
-      color: #2980b9;
+    .status-pending {
+      background: rgba(243, 156, 18, 0.15);
+      color: var(--warning);
     }
     
-    .status-on-leave {
-      background: #ffeaa7;
-      color: #d35400;
+    .status-delivery {
+      background: rgba(52, 152, 219, 0.15);
+      color: var(--secondary);
     }
     
-    .chart-container {
-      background: white;
-      border-radius: 10px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      margin-top: 1rem;
-      height: 400px;
+    .status-leave {
+      background: rgba(231, 76, 60, 0.15);
+      color: var(--danger);
     }
     
-    .form-container {
-      background: white;
-      border-radius: 10px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      max-width: 600px;
-      margin: 0 auto;
+    .status-completed {
+      background: rgba(39, 174, 96, 0.15);
+      color: var(--success);
     }
     
-    .chat-container {
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 120px);
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      overflow: hidden;
+    .status-sold {
+      background: rgba(155, 89, 182, 0.15);
+      color: #9b59b6;
     }
     
-    .chat-header {
-      padding: 1rem;
-      border-bottom: 1px solid #eee;
-      background: var(--primary);
-      color: white;
+    .status-cancelled {
+      background: rgba(231, 76, 60, 0.15);
+      color: var(--danger);
     }
     
-    .chat-messages {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-    }
-    
-    .message {
-      margin-bottom: 1rem;
-      max-width: 70%;
-    }
-    
-    .message-sent {
-      margin-left: auto;
-      text-align: right;
-    }
-    
-    .message-content {
-      padding: 0.8rem;
-      border-radius: 10px;
-      display: inline-block;
-    }
-    
-    .message-received .message-content {
-      background: #e9f5ff;
-    }
-    
-    .message-sent .message-content {
-      background: var(--secondary);
-      color: white;
-    }
-    
-    .message-input {
-      display: flex;
-      padding: 1rem;
-      border-top: 1px solid #eee;
-      background: #f8f9fa;
-    }
-    
-    .message-input input {
-      flex: 1;
-      padding: 0.8rem;
-      border: 1px solid #ddd;
-      border-radius: 5px 0 0 5px;
-    }
-    
-    .message-input button {
-      border-radius: 0 5px 5px 0;
-    }
-    
-    .drag-container {
-      min-height: 200px;
-      background: #f8f9fa;
-      border: 1px dashed #ddd;
-      padding: 1rem;
-      margin-bottom: 1rem;
-    }
-    
-    .drag-item {
-      padding: 0.5rem;
-      background: white;
-      border: 1px solid #ddd;
-      margin-bottom: 0.5rem;
-      cursor: move;
-    }
-    
-    .tree-view {
-      background: white;
-      padding: 1rem;
-      border-radius: 5px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .tree-node {
-      margin-left: 1rem;
-      position: relative;
-    }
-    
-    .tree-node:before {
-      content: '';
-      position: absolute;
-      left: -1rem;
-      top: 0.5rem;
-      width: 1rem;
-      height: 1px;
-      background: #ddd;
-    }
-    
-    .tree-node:last-child:before {
-      height: 0.5rem;
-    }
-    
-    .tree-node > div {
-      padding: 0.5rem;
-      border-left: 2px solid var(--secondary);
-    }
-    
-    /* Responsive */
+    /* Responsive Design */
     @media (max-width: 992px) {
       .sidebar {
-        width: 70px;
+        transform: translateX(-100%);
       }
       
-      .content {
-        margin-left: 70px;
+      .main-content {
+        margin-left: 0;
       }
       
-      .sidebar .nav-item span {
-        display: none;
+      .sidebar.active {
+        transform: translateX(0);
       }
-    }
-    
-    @media (max-width: 768px) {
-      .dashboard {
-        grid-template-columns: 1fr;
+      
+      .mobile-toggle {
+        display: block;
       }
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"></script>
-  <script src="assets/js/api.js" defer></script>
-  <script src="assets/js/main.js" defer></script>
 </head>
 <body>
-  <div class="app-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="logo-section">
-        <img src="assets/images/logo.svg" alt="Logo" class="logo">
-        <h2>TransForge™</h2>
-        <div id="companyNameDisplay" class="company-name"></div>
+  <aside class="sidebar">
+    <div class="logo-container">
+      <div class="logo-icon">
+        <i class="fas fa-truck"></i>
       </div>
-      <ul class="nav-menu">
-        <li class="nav-item active" data-page="dashboard">
-          <i class="fas fa-tachometer-alt"></i>
-          <span>Dashboard</span>
-        </li>
-        <li class="nav-item" data-page="drivers">
-          <i class="fas fa-users"></i>
-          <span>Drivers & Vehicles</span>
-        </li>
-        <li class="nav-item" data-page="tenders">
-          <i class="fas fa-file-contract"></i>
-          <span>Tenders</span>
-        </li>
-        <li class="nav-item" data-page="invoices">
-          <i class="fas fa-file-invoice-dollar"></i>
-          <span>Invoices</span>
-        </li>
-        <li class="nav-item" data-page="reports">
-          <i class="fas fa-chart-bar"></i>
-          <span>Reports</span>
-        </li>
-        <li class="nav-item" data-page="chat">
-          <i class="fas fa-comments"></i>
-          <span>Team Chat</span>
-        </li>
-        <li class="nav-item" data-page="notifications">
-          <i class="fas fa-bell"></i>
-          <span>Notifications</span>
-        </li>
-        <li class="nav-item" data-page="admin" id="adminMenuItem" style="display: none;">
-          <i class="fas fa-cog"></i>
-          <span>Admin Tools</span>
-        </li>
-      </ul>
-    </aside>
-
-    <!-- Content Area -->
-    <div class="content">
-      <!-- Header -->
-      <div class="header">
-        <div class="app-title" id="appCompanyName">TransForge™</div>
-        <div class="header-actions">
-          <div class="notification-badge" onclick="loadPage('notifications')">
-            <i class="fas fa-bell fa-lg"></i>
-            <span class="badge" id="notifCount">0</span>
+      <div>
+        <div class="logo-text">TransForge™</div>
+        <div class="company-name" id="companyName">Your Company</div>
+      </div>
+    
+    <ul class="nav-menu">
+      <li class="nav-item active" data-page="dashboard">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </li>
+      <li class="nav-item" data-page="drivers">
+        <i class="fas fa-users"></i> Drivers & Vehicles
+      </li>
+      <li class="nav-item" data-page="tenders">
+        <i class="fas fa-file-contract"></i> Tenders
+      </li>
+      <li class="nav-item" data-page="invoices">
+        <i class="fas fa-file-invoice-dollar"></i> Invoices
+      </li>
+      <li class="nav-item" data-page="reports">
+        <i class="fas fa-chart-bar"></i> Reports
+      </li>
+      <li class="nav-item" data-page="admin" id="adminMenuItem" style="display:none;">
+        <i class="fas fa-cog"></i> Administration
+      </li>
+      <li class="nav-item" data-page="chat">
+        <i class="fas fa-comments"></i> Chat
+      </li>
+      <li class="nav-item" data-page="notifications">
+        <i class="fas fa-bell"></i> Notifications
+        <span class="nav-badge" id="notifBadge">0</span>
+      </li>
+    </ul>
+  </aside>
+  
+  <main class="main-content">
+    <header class="header">
+      <div class="mobile-toggle">
+        <i class="fas fa-bars"></i>
+      </div>
+      <div class="header-actions">
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search...">
+        </div>
+        <div class="user-actions">
+          <div class="notification-btn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="headerNotifBadge">0</span>
           </div>
-          <div id="userProfile" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-            <img src="https://ui-avatars.com/api/?name=Admin+User&background=3498db&color=fff" alt="User" class="avatar">
-            <div>
-              <div style="font-weight: 600;" id="userName">Admin User</div>
-              <div style="font-size: 0.8rem; color: var(--gray);" id="userRole">Administrator</div>
-            </div>
+          <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=User&background=2c3e50&color=fff" alt="User" class="avatar">
+            <span class="username" id="userName">User</span>
           </div>
         </div>
       </div>
-
-      <!-- Page Content (Dynamically Loaded) -->
-      <div id="pageContent" class="page-content">
-        <!-- Dashboard content will be loaded here by default -->
+    </header>
+    
+    <div id="pageContent">
+      <!-- Dashboard content will load here -->
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-label">Total Drivers</div>
+          <div class="stat-value" id="totalDrivers">0</div>
+          <div class="stat-trend trend-up">
+            <i class="fas fa-arrow-up"></i> 12% from last month
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-truck"></i>
+          </div>
+          <div class="stat-label">Active Vehicles</div>
+          <div class="stat-value" id="activeVehicles">0</div>
+          <div class="stat-trend trend-down">
+            <i class="fas fa-arrow-down"></i> 3% from last month
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-file-contract"></i>
+          </div>
+          <div class="stat-label">Pending Tenders</div>
+          <div class="stat-value" id="pendingTenders">0</div>
+          <div class="stat-trend trend-up">
+            <i class="fas fa-arrow-up"></i> 8% from last month
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          <div class="stat-label">Monthly Revenue</div>
+          <div class="stat-value" id="monthlyRevenue">€0</div>
+          <div class="stat-trend trend-up">
+            <i class="fas fa-arrow-up"></i> 15% from last month
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <div class="section-title">
+          <i class="fas fa-tasks"></i> Recent Activities
+        </div>
+        <div class="activity-list" id="activityList">
+          <!-- Activities will load here -->
+        </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script>
-    // App state
-    const state = {
-      currentUser: null,
-      companyName: '',
-      isAdmin: false,
-      currentPage: 'dashboard',
-      githubConnected: false,
-      githubToken: '',
-      repoName: '',
-      data: {
-        drivers: [],
-        vehicles: [],
-        tenders: [],
-        invoices: [],
-        users: [],
-        messages: []
-      }
-    };
-
-    // Initialize the app
-    document.addEventListener('DOMContentLoaded', function() {
-      // Check for saved data
-      const savedData = localStorage.getItem('translogixData');
-      if (savedData) {
-        state.data = JSON.parse(savedData);
-      }
-      
-      // Check if we have a registered user
-      const savedUser = localStorage.getItem('translogixUser');
-      if (savedUser) {
-        const user = JSON.parse(savedUser);
-        state.currentUser = user.email;
-        state.companyName = user.companyName;
-        state.isAdmin = user.isAdmin;
-        
-        document.getElementById('appCompanyName').textContent = user.companyName;
-        document.getElementById('companyNameDisplay').textContent = user.companyName;
-        document.getElementById('userName').textContent = user.name || user.email.split('@')[0];
-        document.getElementById('userRole').textContent = user.isAdmin ? 'Administrator' : 'User';
-        
-        // Show app
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'flex';
-        
-        // Load dashboard
-        loadPage('dashboard');
-      }
-      
-      // Setup event listeners
-      document.getElementById('loginBtn').addEventListener('click', login);
-      document.getElementById('showRegister').addEventListener('click', showRegister);
-      document.getElementById('showLogin').addEventListener('click', showLogin);
-      document.getElementById('registerBtn').addEventListener('click', register);
-      document.getElementById('setupGitHubBtn').addEventListener('click', setupGitHub);
-      document.getElementById('skipForNow').addEventListener('click', skipGitHub);
-      
-      // Setup navigation
-      setupNavigation();
-      
-      // Initialize charts (if needed)
-      setTimeout(initCharts, 500);
-    });
-
-    // Login function
-    function login() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      
-      // Simple validation
-      if (!email || !password) {
-        alert('Please enter both email and password');
-        return;
-      }
-      
-      // Check if user exists
-      const user = state.data.users.find(u => u.email === email && u.password === password);
-      
+    // Check authentication
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = localStorage.getItem('transforge_user');
       if (!user) {
-        alert('Invalid email or password');
+        window.location.href = 'login.html';
         return;
       }
       
-      // Save user to state
-      state.currentUser = user.email;
-      state.companyName = user.companyName;
-      state.isAdmin = user.isAdmin;
+      const userData = JSON.parse(user);
+      document.getElementById('userName').textContent = userData.email.split('@')[0];
+      document.getElementById('companyName').textContent = userData.companyName;
       
-      // Save user to localStorage
-      localStorage.setItem('translogixUser', JSON.stringify({
-        email: user.email,
-        companyName: user.companyName,
-        name: user.name,
-        isAdmin: user.isAdmin
-      }));
-      
-      // Update UI
-      document.getElementById('appCompanyName').textContent = user.companyName;
-      document.getElementById('companyNameDisplay').textContent = user.companyName;
-      document.getElementById('userName').textContent = user.name || user.email.split('@')[0];
-      document.getElementById('userRole').textContent = user.isAdmin ? 'Administrator' : 'User';
-      
-      // Hide login, show app
-      document.getElementById('loginPage').style.display = 'none';
-      document.getElementById('appContainer').style.display = 'flex';
-      
-      // Show admin menu if admin
-      if (state.isAdmin) {
-        document.getElementById('adminMenuItem').style.display = 'flex';
+      if (userData.isAdmin) {
+        document.getElementById('adminMenuItem').style.display = 'block';
       }
       
-      // Load the dashboard
-      loadPage('dashboard');
-    }
-
-    // Show register form
-    function showRegister(e) {
-      e.preventDefault();
-      document.getElementById('loginPage').style.display = 'none';
-      document.getElementById('registerPage').style.display = 'flex';
-    }
-
-    // Show login form
-    function showLogin(e) {
-      e.preventDefault();
-      document.getElementById('registerPage').style.display = 'none';
-      document.getElementById('loginPage').style.display = 'flex';
-    }
-
-    // Register function
-    function register() {
-      const companyName = document.getElementById('companyName').value;
-      const email = document.getElementById('regEmail').value;
-      const password = document.getElementById('regPassword').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
+      // Load initial data
+      loadDashboardData();
+      setupEventListeners();
+    });
+    
+    function setupEventListeners() {
+      // Mobile sidebar toggle
+      document.querySelector('.mobile-toggle').addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('active');
+      });
       
-      // Validation
-      if (!companyName || !email || !password || !confirmPassword) {
-        alert('Please fill in all fields');
-        return;
-      }
-      
-      if (password !== confirmPassword) {
-        alert('Passwords do not match');
-        return;
-      }
-      
-      // Check if user already exists
-      if (state.data.users.some(u => u.email === email)) {
-        alert('User with this email already exists');
-        return;
-      }
-      
-      // Create new user
-      const newUser = {
-        id: Date.now().toString(),
-        name: email.split('@')[0],
-        email: email,
-        password: password,
-        companyName: companyName,
-        isAdmin: true,
-        createdAt: new Date().toISOString()
-      };
-      
-      // Add to users
-      state.data.users.push(newUser);
-      
-      // Save data
-      saveData();
-      
-      // Show GitHub setup
-      document.getElementById('registerPage').style.display = 'none';
-      document.getElementById('githubSetupPage').style.display = 'flex';
-      
-      // Set company name
-      state.companyName = companyName;
-    }
-
-    // Setup GitHub integration
-    function setupGitHub() {
-      const token = document.getElementById('githubToken').value;
-      const repo = document.getElementById('repoName').value;
-      
-      if (!token) {
-        alert('Please enter your GitHub token');
-        return;
-      }
-      
-      if (!repo) {
-        alert('Please enter a repository name');
-        return;
-      }
-      
-      // Simulate GitHub connection
-      state.githubConnected = true;
-      state.githubToken = token;
-      state.repoName = repo;
-      
-      alert('Successfully connected to GitHub! Repository created: ' + repo);
-      
-      // Now log the user in
-      const email = document.getElementById('regEmail').value;
-      const user = state.data.users.find(u => u.email === email);
-      
-      if (user) {
-        state.currentUser = user.email;
-        state.isAdmin = user.isAdmin;
-        
-        // Save user to localStorage
-        localStorage.setItem('translogixUser', JSON.stringify({
-          email: user.email,
-          companyName: user.companyName,
-          name: user.name,
-          isAdmin: user.isAdmin
-        }));
-        
-        // Update UI
-        document.getElementById('appCompanyName').textContent = user.companyName;
-        document.getElementById('companyNameDisplay').textContent = user.companyName;
-        document.getElementById('userName').textContent = user.name || user.email.split('@')[0];
-        document.getElementById('userRole').textContent = user.isAdmin ? 'Administrator' : 'User';
-        
-        // Hide setup, show app
-        document.getElementById('githubSetupPage').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'flex';
-        
-        // Show admin menu
-        document.getElementById('adminMenuItem').style.display = 'flex';
-        
-        // Load dashboard
-        loadPage('dashboard');
-      }
-    }
-
-    // Skip GitHub setup
-    function skipGitHub(e) {
-      e.preventDefault();
-      
-      // Log the user in
-      const email = document.getElementById('regEmail').value;
-      const user = state.data.users.find(u => u.email === email);
-      
-      if (user) {
-        state.currentUser = user.email;
-        state.isAdmin = user.isAdmin;
-        
-        // Save user to localStorage
-        localStorage.setItem('translogixUser', JSON.stringify({
-          email: user.email,
-          companyName: user.companyName,
-          name: user.name,
-          isAdmin: user.isAdmin
-        }));
-        
-        // Update UI
-        document.getElementById('appCompanyName').textContent = user.companyName;
-        document.getElementById('companyNameDisplay').textContent = user.companyName;
-        document.getElementById('userName').textContent = user.name || user.email.split('@')[0];
-        document.getElementById('userRole').textContent = user.isAdmin ? 'Administrator' : 'User';
-        
-        // Hide setup, show app
-        document.getElementById('githubSetupPage').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'flex';
-        
-        // Show admin menu
-        document.getElementById('adminMenuItem').style.display = 'flex';
-        
-        // Load dashboard
-        loadPage('dashboard');
-      }
-    }
-
-    // Open token guide
-    function openTokenGuide() {
-      alert('To create a GitHub access token:\n\n1. Go to GitHub Settings > Developer Settings\n2. Select Personal Access Tokens\n3. Generate a new token with "repo" permissions\n4. Copy the token and paste it here');
-    }
-
-    // Save data to storage
-    function saveData() {
-      // Save to localStorage
-      localStorage.setItem('translogixData', JSON.stringify(state.data));
-      
-      // If GitHub is connected, save to GitHub
-      if (state.githubConnected) {
-        // In a real app, this would commit to GitHub repo
-        console.log('Saving data to GitHub repository:', state.repoName);
-        // Simulate API call
-        setTimeout(() => {
-          console.log('Data saved to GitHub successfully!');
-        }, 1000);
-      }
-    }
-
-    // Setup navigation
-    function setupNavigation() {
-      // Main nav items
-      document.querySelectorAll('.nav-item[data-page]').forEach(item => {
-        item.addEventListener('click', function() {
-          const page = this.getAttribute('data-page');
-          loadPage(page);
-          
-          // Update active state
+      // Navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
           document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-          this.classList.add('active');
+          item.classList.add('active');
+          loadPage(item.dataset.page);
         });
       });
+      
+      // Notification badge
+      document.querySelector('.notification-btn').addEventListener('click', () => {
+        loadPage('notifications');
+      });
     }
-
-    // Load page content
+    
+    async function loadDashboardData() {
+      // In a real app, this would fetch from your data storage
+      // For now, we'll simulate with sample data
+      document.getElementById('totalDrivers').textContent = 42;
+      document.getElementById('activeVehicles').textContent = 28;
+      document.getElementById('pendingTenders').textContent = 15;
+      document.getElementById('monthlyRevenue').textContent = '€24,560';
+      
+      // Generate sample activities
+      const activities = [
+        { type: 'driver', action: 'added', name: 'John Smith', time: '2 hours ago' },
+        { type: 'tender', action: 'created', name: 'Transport to Berlin', time: '5 hours ago' },
+        { type: 'invoice', action: 'paid', name: 'INV-2023-045', time: '1 day ago' },
+        { type: 'vehicle', action: 'assigned', name: 'Mercedes Actros', time: '2 days ago' }
+      ];
+      
+      const activityList = document.getElementById('activityList');
+      activities.forEach(activity => {
+        activityList.innerHTML += `
+          <div class="activity-item">
+            <div class="activity-icon ${activity.type}">
+              <i class="fas fa-${activity.type === 'driver' ? 'user' : activity.type}"></i>
+            </div>
+            <div class="activity-details">
+              <div class="activity-text">
+                ${activity.name} was ${activity.action}
+              </div>
+              <div class="activity-time">${activity.time}</div>
+            </div>
+          </div>
+        `;
+      });
+    }
+    
     function loadPage(page) {
-      document.getElementById('pageContent').innerHTML = '';
-      
-      switch(page) {
-        case 'dashboard':
-          loadDashboard();
-          break;
-        case 'drivers':
-          loadDrivers();
-          break;
-        case 'tenders':
-          loadTenders();
-          break;
-        case 'invoices':
-          loadInvoices();
-          break;
-        case 'reports':
-          loadReports();
-          break;
-        case 'admin':
-          loadAdminTools();
-          break;
-        case 'chat':
-          loadChat();
-          break;
-        case 'notifications':
-          loadNotifications();
-          break;
-        default:
-          document.getElementById('pageContent').innerHTML = '<h2>Page not found</h2>';
-      }
+      // In a full implementation, this would load the appropriate HTML partial
+      // For now, we'll just show an alert
+      console.log(`Loading page: ${page}`);
+      // Actual implementation would fetch and inject HTML
     }
-
-    // Page loading functions
-    function loadDashboard() {
-      document.getElementById('pageContent').innerHTML = `
-        <div class="management-header">
-          <h1>Dashboard</h1>
-        </div>
-        <div class="dashboard">
-          <div class="card stat-card">
-            <div class="stat-value">${state.data.drivers.length}</div>
-            <div class="stat-label">Total Drivers</div>
-            <i class="fas fa-users stat-icon"></i>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-value">${state.data.vehicles.length}</div>
-            <div class="stat-label">Total Vehicles</div>
-            <i class="fas fa-truck stat-icon"></i>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-value">${state.data.tenders.length}</div>
-            <div class="stat-label">Total Tenders</div>
-            <i class="fas fa-file-contract stat-icon"></i>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-value">${state.data.invoices.length}</div>
-            <div class="stat-label">Total Invoices</div>
-            <i class="fas fa-file-invoice-dollar stat-icon"></i>
-          </div>
-        </div>
-      `;
-    }
-
-    function loadDrivers() {
-      document.getElementById('pageContent').innerHTML = `
-        <div class="management-header">
-          <h1>Driver & Vehicle Management</h1>
-          <button class="btn btn-primary" onclick="addDriver()">Add Driver</button>
-        </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Vehicle</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="driversTable"></tbody>
-          </table>
-        </div>
-        <div class="management-header">
-          <h2>Vehicles</h2>
-          <button class="btn btn-primary" onclick="addVehicle()">Add Vehicle</button>
-        </div>
-        <div class="drag-container" id="vehiclesDrag">
-          <!-- Vehicles will be listed here for drag-drop -->
-        </div>
-      `;
-      
-      // Load drivers
-      const table = document.getElementById('driversTable');
-      table.innerHTML = state.data.drivers.map(d => `
-        <tr>
-          <td>${d.name}</td>
-          <td><span class="status status-${d.status.toLowerCase().replace(' ', '-')}" >${d.status}</span></td>
-          <td>${d.vehicle || 'None'}</td>
-          <td>
-            <button class="btn btn-secondary" onclick="editDriver(${d.id})">Edit</button>
-            <button class="btn btn-danger" onclick="deleteDriver(${d.id})">Delete</button>
-          </td>
-        </tr>
-      `).join('');
-      
-      // Load vehicles for drag-drop
-      const dragContainer = document.getElementById('vehiclesDrag');
-      dragContainer.innerHTML = state.data.vehicles.map(v => `
-        <div class="drag-item" data-id="${v.id}">
-          ${v.name} (Max Load: ${v.maxLoad} tons)
-        </div>
-      `).join('');
-      
-      // Initialize dragula for drag-drop
-      dragula([dragContainer]);
-    }
-
-    // Similar functions for other pages (tenders, invoices, etc.)
-    // ... (I'll provide full code in the response)
   </script>
 </body>
 </html>
