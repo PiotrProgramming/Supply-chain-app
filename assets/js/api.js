@@ -1,30 +1,49 @@
-const GITHUB_TOKEN = 'YOUR_GITHUB_TOKEN'; // Replace with your PAT
-const REPO_OWNER = 'YOUR_REPO_OWNER'; // e.g., 'yourusername'
-const REPO_NAME = 'transforge-data'; // Your data repo
-const BASE_PATH = 'data/';
-
 const API = {
   async get(file) {
-    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${BASE_PATH}${file}`, {
-      headers: { Authorization: `token ${GITHUB_TOKEN}` }
+    const token = localStorage.getItem('githubToken');
+    const repo = localStorage.getItem('githubRepo');
+    if (!token || !repo) return JSON.parse(localStorage.getItem(`transforge_data_${file}`) || '[]');
+
+    const res = await fetch(`https://api.github.com/repos/${await this.getOwner()}/${repo}/contents/data/${file}`, {
+      headers: { Authorization: `token ${token}` }
     });
     const data = await res.json();
     return JSON.parse(atob(data.content));
   },
-  
+
   async put(file, content) {
-    const existing = await this.get(file).catch(() => null);
-    const sha = existing ? existing.sha : null;
-    
-    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${BASE_PATH}${file}`, {
+    const token = localStorage.getItem('githubToken');
+    const repo = localStorage.getItem('githubRepo');
+    if (!token || !repo) {
+      localStorage.setItem(`transforge_data_${file}`, JSON.stringify(content));
+      return;
+    }
+
+    const owner = await this.getOwner();
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data/${file}`, {
+      method: 'GET',
+      headers: { Authorization: `token ${token}` }
+    }).catch(() => null);
+
+    const sha = res?.ok ? (await res.json()).sha : null;
+
+    await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data/${file}`, {
       method: 'PUT',
-      headers: { Authorization: `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `token ${token}` },
       body: JSON.stringify({
         message: `Update ${file}`,
         content: btoa(JSON.stringify(content)),
         sha
       })
     });
-    return res.json();
+  },
+
+  async getOwner() {
+    const token = localStorage.getItem('githubToken');
+    const res = await fetch('https://api.github.com/user', {
+      headers: { Authorization: `token ${token}` }
+    });
+    const user = await res.json();
+    return user.login;
   }
 };
