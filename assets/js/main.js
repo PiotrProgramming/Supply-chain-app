@@ -1,3 +1,5 @@
+
+
 document.addEventListener('DOMContentLoaded', () => {
   // Check if user is logged in
   const user = localStorage.getItem('transforge_user');
@@ -66,3 +68,29 @@ function loadPage(page) {
       `;
     });
 }
+
+// Ensure API is defined
+if (typeof window.API === 'undefined') {
+    window.API = {
+        async get(file) {
+            return JSON.parse(localStorage.getItem(`transforge_data_${file}`) || '[]');
+        },
+        async put(file, content) {
+            localStorage.setItem(`transforge_data_${file}`, JSON.stringify(content));
+        }
+    };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const user = localStorage.getItem('transforge_user');
+    if (!user) {
+        if (!window.location.pathname.includes('login.html') && 
+            !window.location.pathname.includes('register.html') && 
+            !window.location.pathname.includes('github-setup.html')) {
+            window.location.href = 'login.html';
+        }
+        return;
+    }
+
+    // Rest of your dashboard initialization code...
+});
