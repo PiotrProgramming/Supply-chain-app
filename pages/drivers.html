@@ -1,0 +1,12 @@
+<div class="page">
+  <h2>Driver & Vehicle Management</h2>
+  <button onclick="Drivers.create()">Add Driver</button>
+  <table>
+    <thead><tr><th>Name</th><th>Status</th><th>Vehicle</th><th>Actions</th></tr></thead>
+    <tbody id="driversTable"></tbody>
+  </table>
+  <!-- Drag-drop for vehicle assignment -->
+  <div id="vehiclesList" class="drag-container">Vehicles</div>
+  <script src="../assets/js/drivers.js"></script>
+  <script>Drivers.load();</script>
+</div>
