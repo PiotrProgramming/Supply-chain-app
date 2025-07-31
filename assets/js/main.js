@@ -1,26 +1,33 @@
-// Include HTML templates (simple fetch-based)
-document.querySelectorAll('[include-html]').forEach(el => {
-  fetch(el.getAttribute('include-html'))
-    .then(res => res.text())
-    .then(html => el.innerHTML = html);
+document.addEventListener('DOMContentLoaded', () => {
+  const user = localStorage.getItem('transforge_user');
+  if (!user) {
+    if (!window.location.pathname.includes('index.html')) {
+      window.location.href = 'index.html';
+    }
+    return;
+  }
+
+  const userData = JSON.parse(user);
+  document.getElementById('appContainer').style.display = 'block';
+  document.getElementById('appCompanyName').textContent = userData.companyName;
+  document.getElementById('companyNameDisplay').textContent = userData.companyName;
+  document.getElementById('userName').textContent = userData.email.split('@')[0];
+
+  if (userData.isAdmin) {
+    document.getElementById('adminMenuItem').style.display = 'flex';
+  }
+
+  loadPage('dashboard');
+  Notifications.load();
 });
 
-// Simple router to load subpages into #content
 function loadPage(page) {
   fetch(`pages/${page}.html`)
     .then(res => res.text())
     .then(html => {
-      document.getElementById('content').innerHTML = html;
+      document.getElementById('pageContent').innerHTML = html;
+      if (window[page.charAt(0).toUpperCase() + page.slice(1)]?.load) {
+        window[page.charAt(0).toUpperCase() + page.slice(1)].load();
+      }
     });
 }
-
-// On dashboard load, show basic stats (fetch from GitHub)
-document.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('token')) {
-    // Fetch stats
-    API.get('drivers.json').then(drivers => document.getElementById('totalDrivers').textContent = drivers.length);
-    API.get('tenders.json').then(tenders => document.getElementById('pendingTenders').textContent = tenders.filter(t => t.status === 'pending').length);
-  } else {
-    window.location.href = 'index.html';
-  }
-});
