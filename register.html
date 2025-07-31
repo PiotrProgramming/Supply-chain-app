@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TransForge™ - Register</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="stylesheet" href="assets/css/main.css"/>
 </head>
 <body>
   <div class="login-container">
@@ -26,52 +26,32 @@
         <form id="registerForm">
           <div class="form-group">
             <label>Company Name</label>
-            <input type="text" id="regCompanyName" required>
+            <input type="text" id="regCompanyName" required />
           </div>
           <div class="form-group">
             <label>Email</label>
-            <input type="email" id="regEmail" required>
+            <input type="email" id="regEmail" required />
           </div>
           <div class="form-group">
             <label>Password</label>
-            <input type="password" id="regPassword" required>
+            <input type="password" id="regPassword" required />
           </div>
           <div class="form-group">
-            <label>Confirm Password</label>
-            <input type="password" id="regConfirmPassword" required>
+            <label>GitHub Token</label>
+            <input type="text" id="regGitHubToken" placeholder="Paste your GitHub token" required />
+          </div>
+          <div class="form-group">
+            <label>Repository Name</label>
+            <input type="text" id="regRepoName" placeholder="transforge-company-data" required />
           </div>
           <button type="submit" class="btn btn-primary">Create Account</button>
-          <p>Already have an account? <a href="login.html" class="link-primary">Sign in</a></p>
+          <p>Already have an account? <a href="login.html">Sign in</a></p>
         </form>
       </div>
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('registerForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const companyName = document.getElementById('regCompanyName').value;
-        const email = document.getElementById('regEmail').value;
-        const pw = document.getElementById('regPassword').value;
-        const confirm = document.getElementById('regConfirmPassword').value;
-
-        if (pw !== confirm) {
-          alert('Passwords do not match');
-          return;
-        }
-
-        // Save for GitHub setup
-        localStorage.setItem('pendingUser', JSON.stringify({ 
-          companyName, 
-          email, 
-          password: pw 
-        }));
-        
-        // Redirect to GitHub setup
-        window.location.href = 'github-setup.html';
-      });
-    });
-  </script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
 </body>
 </html>
