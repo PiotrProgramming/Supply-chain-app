@@ -1,56 +1,60 @@
-// GitHub API helper
-function createGitHubAPI(token, repoName, owner) {
-  return {
-    async get(file) {
-      const url = `https://api.github.com/repos/${owner}/${repoName}/contents/data/${file}`;
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `token ${token}`,
-        },
-      });
+window.API = {
+  async get(file) {
+    const token = localStorage.getItem('githubToken');
+    const repo = localStorage.getItem('githubRepo');
+    if (!token || !repo) return [];
 
-      if (!response.ok) {
-        if (response.status === 404) return [];
-        throw new Error(`Failed to fetch ${file}`);
-      }
+    const owner = await this.getOwner();
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${file}`, {
+      headers: { Authorization: `token ${token}` }
+    });
 
-      const data = await response.json();
-      return JSON.parse(atob(data.content));
-    },
+    if (!response.ok) return [];
 
-    async put(file, content) {
-      const url = `https://api.github.com/repos/${owner}/${repoName}/contents/data/${file}`;
-      let sha = null;
+    const data = await response.json();
+    return JSON.parse(atob(data.content));
+  },
 
-      // Check if file exists
-      try {
-        const response = await fetch(url, {
-          headers: { Authorization: `token ${token}` },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          sha = data.sha;
-        }
-      } catch (err) {
-        console.log(`File ${file} doesn't exist yet`);
-      }
+  async put(file, content) {
+    const token = localStorage.getItem('githubToken');
+    const repo = localStorage.getItem('githubRepo');
+    if (!token || !repo) return;
 
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          Authorization: `token ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: `Update ${file}`,
-          content: btoa(JSON.stringify(content)),
-          sha,
-        }),
-      });
+    const owner = await this.getOwner();
 
-      if (!response.ok) {
-        throw new Error(`Failed to update ${file}`);
-      }
-    },
-  };
-}
+    const fileResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${file}`, {
+      headers: { Authorization: `token ${token}` }
+    });
+
+    let sha = null;
+    if (fileResponse.ok) {
+      const data = await fileResponse.json();
+      sha = data.sha;
+    }
+
+    await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${file}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `Update ${file}`,
+        content: btoa(JSON.stringify(content)),
+        sha
+      })
+    });
+  },
+
+  async getOwner() {
+    const token = localStorage.getItem('githubToken');
+    const res = await fetch('https://api.github.com/user', {
+      headers: { Authorization: `token ${token}` }
+    });
+
+    if (!res.ok) throw new Error('Invalid GitHub token');
+
+    const user = await res.json();
+    return user.login;
+  }
+};
