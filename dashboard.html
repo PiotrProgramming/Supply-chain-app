@@ -7,13 +7,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/main.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="assets/js/main.js" defer></script>
-  <script src="assets/js/api.js" defer></script>
-  <script src="assets/js/notifications.js" defer></script>
-  <script src="assets/js/api-init.js" defer></script>
-  <script src="assets/js/main.js" defer></script>
 </head>
 <body>
   <div id="appContainer" class="app-container">
@@ -79,9 +72,62 @@
 
       <!-- Page Content -->
       <div id="pageContent">
-        <!-- Dynamically loaded -->
+        <div class="dashboard">
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Total Drivers</div>
+            <i class="fas fa-users stat-icon"></i>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Active Vehicles</div>
+            <i class="fas fa-truck stat-icon"></i>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Pending Tenders</div>
+            <i class="fas fa-file-contract stat-icon"></i>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Revenue This Month</div>
+            <i class="fas fa-dollar-sign stat-icon"></i>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = localStorage.getItem('transforge_user');
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const userData = JSON.parse(user);
+      document.getElementById('appContainer').style.display = 'block';
+      document.getElementById('appCompanyName').textContent = 'TransForge™';
+      document.getElementById('companyNameDisplay').textContent = 'Your Company';
+      document.getElementById('userName').textContent = userData.email.split('@')[0];
+
+      if (userData.isAdmin) {
+        document.getElementById('adminMenuItem').style.display = 'flex';
+      }
+
+      // Initialize navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+    });
+
+    function loadPage(page) {
+      alert('Page loading: ' + page);
+    }
+  </script>
 </body>
 </html>
