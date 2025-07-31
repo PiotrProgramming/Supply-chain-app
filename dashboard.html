@@ -1,16 +1,16 @@
+<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TransForge™ - Transport Management</title>
+  <title>TransForge™ - Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --primary: #2c3e50;
       --secondary: #3498db;
       --success: #27ae60;
-      --warning: #f39c12;
       --danger: #e74c3c;
       --light: #ecf0f1;
       --dark: #34495e;
@@ -273,157 +273,6 @@
       color: var(--danger);
     }
     
-    /* Page Content */
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.8rem;
-    }
-    
-    .page-title {
-      font-size: 1.5rem;
-      color: var(--primary);
-      font-weight: 700;
-    }
-    
-    .page-actions {
-      display: flex;
-      gap: 0.8rem;
-    }
-    
-    .btn {
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 0.7rem;
-    }
-    
-    .btn-primary {
-      background: var(--secondary);
-      color: white;
-    }
-    
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--secondary);
-      color: var(--secondary);
-    }
-    
-    .btn-success {
-      background: var(--success);
-      color: white;
-    }
-    
-    .btn-warning {
-      background: var(--warning);
-      color: white;
-    }
-    
-    .btn-danger {
-      background: var(--danger);
-      color: white;
-    }
-    
-    .btn:hover {
-      opacity: 0.9;
-      transform: translateY(-2px);
-    }
-    
-    .section {
-      background: white;
-      border-radius: 12px;
-      box-shadow: var(--card-shadow);
-      padding: 1.8rem;
-      margin-bottom: 2rem;
-    }
-    
-    .section-title {
-      font-size: 1.2rem;
-      color: var(--dark);
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.8rem;
-      border-bottom: 2px solid var(--light);
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-    }
-    
-    /* Tables */
-    .table-responsive {
-      overflow-x: auto;
-    }
-    
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 600px;
-    }
-    
-    .data-table th {
-      background: var(--light);
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      color: var(--dark);
-    }
-    
-    .data-table td {
-      padding: 1rem;
-      border-bottom: 1px solid #eee;
-    }
-    
-    .data-table tr:hover {
-      background: rgba(52, 152, 219, 0.05);
-    }
-    
-    .status-badge {
-      padding: 0.4rem 0.8rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-    
-    .status-available {
-      background: rgba(39, 174, 96, 0.15);
-      color: var(--success);
-    }
-    
-    .status-pending {
-      background: rgba(243, 156, 18, 0.15);
-      color: var(--warning);
-    }
-    
-    .status-delivery {
-      background: rgba(52, 152, 219, 0.15);
-      color: var(--secondary);
-    }
-    
-    .status-leave {
-      background: rgba(231, 76, 60, 0.15);
-      color: var(--danger);
-    }
-    
-    .status-completed {
-      background: rgba(39, 174, 96, 0.15);
-      color: var(--success);
-    }
-    
-    .status-sold {
-      background: rgba(155, 89, 182, 0.15);
-      color: #9b59b6;
-    }
-    
-    .status-cancelled {
-      background: rgba(231, 76, 60, 0.15);
-      color: var(--danger);
-    }
-    
     /* Responsive Design */
     @media (max-width: 992px) {
       .sidebar {
@@ -454,6 +303,7 @@
         <div class="logo-text">TransForge™</div>
         <div class="company-name" id="companyName">Your Company</div>
       </div>
+    </div>
     
     <ul class="nav-menu">
       <li class="nav-item active" data-page="dashboard">
@@ -567,11 +417,11 @@
   </main>
 
   <script>
-    // Check authentication
+    // Check if user is logged in
     document.addEventListener('DOMContentLoaded', () => {
       const user = localStorage.getItem('transforge_user');
       if (!user) {
-        window.location.href = 'login.html';
+        window.location.href = 'index.html';
         return;
       }
       
@@ -603,21 +453,20 @@
         });
       });
       
-      // Notification badge
+      // Notification button
       document.querySelector('.notification-btn').addEventListener('click', () => {
         loadPage('notifications');
       });
     }
     
     async function loadDashboardData() {
-      // In a real app, this would fetch from your data storage
-      // For now, we'll simulate with sample data
+      // Simulate loading data
       document.getElementById('totalDrivers').textContent = 42;
       document.getElementById('activeVehicles').textContent = 28;
       document.getElementById('pendingTenders').textContent = 15;
       document.getElementById('monthlyRevenue').textContent = '€24,560';
       
-      // Generate sample activities
+      // Simulate activities
       const activities = [
         { type: 'driver', action: 'added', name: 'John Smith', time: '2 hours ago' },
         { type: 'tender', action: 'created', name: 'Transport to Berlin', time: '5 hours ago' },
@@ -626,21 +475,19 @@
       ];
       
       const activityList = document.getElementById('activityList');
-      activities.forEach(activity => {
-        activityList.innerHTML += `
-          <div class="activity-item">
-            <div class="activity-icon ${activity.type}">
-              <i class="fas fa-${activity.type === 'driver' ? 'user' : activity.type}"></i>
-            </div>
-            <div class="activity-details">
-              <div class="activity-text">
-                ${activity.name} was ${activity.action}
-              </div>
-              <div class="activity-time">${activity.time}</div>
-            </div>
+      activityList.innerHTML = activities.map(activity => `
+        <div class="activity-item">
+          <div class="activity-icon ${activity.type}">
+            <i class="fas fa-${activity.type === 'driver' ? 'user' : activity.type}"></i>
           </div>
-        `;
-      });
+          <div class="activity-details">
+            <div class="activity-text">
+              ${activity.name} was ${activity.action}
+            </div>
+            <div class="activity-time">${activity.time}</div>
+          </div>
+        </div>
+      `).join('');
     }
     
     function loadPage(page) {
