@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TransForge™ - GitHub Setup</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-left">
+      <div class="login-hero">
+        <h1>Connect to GitHub</h1>
+        <p>Securely store your company data in a private repository.</p>
+        <div style="text-align:center;margin-top:2rem;">
+          <i class="fab fa-github fa-5x"></i>
+        </div>
+      </div>
+    </div>
+    <div class="login-right">
+      <div class="github-setup">
+        <h2><i class="fab fa-github"></i> GitHub Setup</h2>
+        <div class="github-steps">
+          <div class="github-step">
+            <div class="step-number">1</div>
+            <div>
+              <h3>Create GitHub Account</h3>
+              <p><a href="https://github.com/join" target="_blank">Sign up for GitHub</a> if you don't have an account.</p>
+            </div>
+          </div>
+          <div class="github-step">
+            <div class="step-number">2</div>
+            <div>
+              <h3>Generate Access Token</h3>
+              <p>Go to <strong>Settings → Developer Settings → Personal Access Tokens → Generate New Token</strong></p>
+              <p>Select <code>repo</code> permissions.</p>
+              <button class="btn btn-secondary" id="tokenGuideBtn">
+                <i class="fas fa-book"></i> How to Create Token
+              </button>
+            </div>
+          </div>
+          <div class="github-step">
+            <div class="step-number">3</div>
+            <div>
+              <h3>Paste Token & Repository Name</h3>
+              <div class="form-group">
+                <label>GitHub Personal Access Token</label>
+                <input type="text" id="githubToken" placeholder="Paste token here" required>
+              </div>
+              <div class="form-group">
+                <label>Repository Name</label>
+                <input type="text" id="repoName" placeholder="transforge-company-data" value="transforge-company-data" required>
+                <small>Will be created as private</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button id="setupGitHubBtn" class="btn btn-primary">
+          <i class="fab fa-github"></i> Connect & Initialize Repository
+        </button>
+        <p style="text-align:center;margin-top:1rem;">
+          <a href="login.html" id="skipForNow">Skip for now (use local storage)</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Token guide
+      document.getElementById('tokenGuideBtn').addEventListener('click', () => {
+        alert('1. Go to GitHub Settings → Developer Settings → Personal Access Tokens\n\n' +
+              '2. Click "Generate new token" (classic)\n\n' +
+              '3. Give it a name like "TransForge Access"\n\n' +
+              '4. Select ONLY the "repo" scope\n\n' +
+              '5. Click "Generate token" and copy it immediately');
+      });
+
+      // GitHub setup
+      document.getElementById('setupGitHubBtn').addEventListener('click', async () => {
+        const token = document.getElementById('githubToken').value.trim();
+        const repo = document.getElementById('repoName').value.trim();
+
+        if (!token || !repo) {
+          alert('Please fill in all fields');
+          return;
+        }
+
+        try {
+          // Save GitHub credentials
+          localStorage.setItem('githubToken', token);
+          localStorage.setItem('githubRepo', repo);
+
+          const pendingUser = JSON.parse(localStorage.getItem('pendingUser'));
+          pendingUser.isAdmin = true;
+
+          // Save user to GitHub
+          const users = await API.get('users.json').catch(() => []);
+          users.push(pendingUser);
+          await API.put('users.json', users);
+
+          localStorage.setItem('transforge_user', JSON.stringify(pendingUser));
+          localStorage.removeItem('pendingUser');
+          
+          // Redirect to dashboard
+          window.location.href = 'dashboard.html';
+        } catch (err) {
+          console.error('GitHub setup failed:', err);
+          alert(`Error: ${err.message || 'Failed to create repository'}`);
+        }
+      });
+
+      // Skip to local storage
+      document.getElementById('skipForNow').addEventListener('click', (e) => {
+        e.preventDefault();
+        try {
+          const pendingUser = JSON.parse(localStorage.getItem('pendingUser'));
+          pendingUser.isAdmin = true;
+          pendingUser.localOnly = true;
+
+          // Use local storage
+          const users = JSON.parse(localStorage.getItem('transforge_data_users') || '[]');
+          users.push(pendingUser);
+          localStorage.setItem('transforge_data_users', JSON.stringify(users));
+          localStorage.setItem('transforge_user', JSON.stringify(pendingUser));
+          localStorage.removeItem('pendingUser');
+          
+          // Redirect to dashboard
+          window.location.href = 'dashboard.html';
+        } catch (err) {
+          console.error('Local setup failed:', err);
+          alert('Failed to create local account');
+        }
+      });
+
+      // API helper
+      const API = {
+        async get(file) {
+          const token = localStorage.getItem('githubToken');
+          const repo = localStorage.getItem('githubRepo');
+          if (!token || !repo) throw new Error('No GitHub credentials');
+          
+          const res = await fetch(`https://api.github.com/repos/${await this.getOwner()}/${repo}/contents/data/${file}`, {
+            headers: { Authorization: `token ${token}` }
+          });
+          
+          if (!res.ok) throw new Error('File not found');
+          
+          const data = await res.json();
+          return JSON.parse(atob(data.content));
+        },
+        
+        async put(file, content) {
+          const token = localStorage.getItem('githubToken');
+          const repo = localStorage.getItem('githubRepo');
+          if (!token || !repo) throw new Error('No GitHub credentials');
+          
+          const owner = await this.getOwner();
+          let sha = null;
+          
+          try {
+            const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data/${file}`, {
+              headers: { Authorization: `token ${token}` }
+            });
+            
+            if (res.ok) {
+              const data = await res.json();
+              sha = data.sha;
+            }
+          } catch (err) {
+            console.log('File does not exist yet, will create new');
+          }
+          
+          await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data/${file}`, {
+            method: 'PUT',
+            headers: { 
+              Authorization: `token ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Initial commit: ${file}`,
+              content: btoa(JSON.stringify(content)),
+              sha: sha
+            })
+          });
+        },
+        
+        async getOwner() {
+          const token = localStorage.getItem('githubToken');
+          const res = await fetch('https://api.github.com/user', {
+            headers: { Authorization: `token ${token}` }
+          });
+          
+          if (!res.ok) throw new Error('Invalid GitHub token');
+          
+          const user = await res.json();
+          return user.login;
+        }
+      };
+    });
+  </script>
+</body>
+</html>
