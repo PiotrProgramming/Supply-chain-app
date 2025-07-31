@@ -1,319 +1,854 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ... existing head content ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransLogix - Transport Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* ... existing styles ... */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --gray: #95a5a6;
+            --sidebar-width: 250px;
+        }
         
-        /* Add loader animation */
-        .view-loader {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        /* Login Page */
+        .login-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .login-left {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .login-right {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100%;
+            padding: 2rem;
+            background-color: white;
         }
         
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* Main App Layout */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        /* Header */
+        .header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
+        /* Navigation */
+        .nav-menu {
+            list-style: none;
+            padding: 1rem 0;
+        }
+        
+        .nav-item {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(255,255,255,0.1);
+            border-left: 3px solid var(--secondary);
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .nav-submenu {
+            list-style: none;
+            padding-left: 2rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .nav-submenu.show {
+            max-height: 500px;
+        }
+        
+        /* Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .stat-icon {
+            align-self: flex-end;
+            font-size: 2.5rem;
+            opacity: 0.2;
+        }
+        
+        /* Management Sections */
+        .management-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status {
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background-color: #ffeaa7;
+            color: #d35400;
+        }
+        
+        .status-in-progress {
+            background-color: #d6eaf8;
+            color: #2980b9;
+        }
+        
+        .status-completed {
+            background-color: #d5f5e3;
+            color: #27ae60;
+        }
+        
+        /* Charts */
+        .chart-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 1rem;
+            height: 400px;
+        }
+        
+        /* Forms */
+        .form-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        /* Notifications */
+        .notification-badge {
+            position: relative;
+        }
+        
+        .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--danger);
+            color: white;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Chat */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 120px);
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            max-width: 70%;
+        }
+        
+        .message-sent {
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .message-content {
+            padding: 0.8rem;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .message-received .message-content {
+            background-color: #e9f5ff;
+        }
+        
+        .message-sent .message-content {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .message-input {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid #eee;
+            background-color: #f8f9fa;
+        }
+        
+        .message-input input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+        }
+        
+        .message-input button {
+            border-radius: 0 5px 5px 0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: visible;
+            }
+            
+            .sidebar .nav-text {
+                display: none;
+            }
+            
+            .content {
+                margin-left: 70px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- ... existing body content ... -->
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-left">
+            <div style="max-width: 500px;">
+                <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">TransLogix</h1>
+                <p style="font-size: 1.2rem; margin-bottom: 2rem;">Comprehensive Transport & Forwarding Management Solution</p>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; text-align: left; margin-top: 2rem;">
+                    <div><i class="fas fa-truck fa-2x"></i><h3>Driver & Vehicle Management</h3></div>
+                    <div><i class="fas fa-file-invoice fa-2x"></i><h3>Tender & Invoice Management</h3></div>
+                    <div><i class="fas fa-chart-bar fa-2x"></i><h3>Real-time Analytics</h3></div>
+                    <div><i class="fas fa-comments fa-2x"></i><h3>Team Collaboration</h3></div>
+                </div>
+            </div>
+        </div>
+        <div class="login-right">
+            <div class="login-form">
+                <h2 style="text-align: center; margin-bottom: 1.5rem;">Sign In to Your Account</h2>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter your password">
+                </div>
+                <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="#" style="color: var(--secondary);">Forgot password?</a>
+                </div>
+                <button id="loginBtn" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">Sign In</button>
+                <p style="text-align: center; margin-top: 1rem;">Don't have an account? <a href="#" id="showRegister" style="color: var(--secondary);">Register here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="appContainer" class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h2 style="display: flex; align-items: center;"><i class="fas fa-truck"></i> <span class="nav-text">TransLogix</span></h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="nav-text">Dashboard</span>
+                </li>
+                <li class="nav-item" id="driversMenu">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">Drivers</span>
+                    <i class="fas fa-chevron-down" style="margin-left: auto;"></i>
+                </li>
+                <ul class="nav-submenu" id="driversSubmenu">
+                    <li class="nav-item" data-page="drivers">
+                        <i class="fas fa-list"></i>
+                        <span class="nav-text">Driver List</span>
+                    </li>
+                    <li class="nav-item" data-page="addDriver">
+                        <i class="fas fa-plus"></i>
+                        <span class="nav-text">Add Driver</span>
+                    </li>
+                </ul>
+                <li class="nav-item" id="vehiclesMenu">
+                    <i class="fas fa-truck"></i>
+                    <span class="nav-text">Vehicles</span>
+                    <i class="fas fa-chevron-down" style="margin-left: auto;"></i>
+                </li>
+                <ul class="nav-submenu" id="vehiclesSubmenu">
+                    <li class="nav-item" data-page="vehicles">
+                        <i class="fas fa-list"></i>
+                        <span class="nav-text">Vehicle List</span>
+                    </li>
+                    <li class="nav-item" data-page="addVehicle">
+                        <i class="fas fa-plus"></i>
+                        <span class="nav-text">Add Vehicle</span>
+                    </li>
+                </ul>
+                <li class="nav-item" data-page="tenders">
+                    <i class="fas fa-file-contract"></i>
+                    <span class="nav-text">Tenders</span>
+                </li>
+                <li class="nav-item" data-page="invoices">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span class="nav-text">Invoices</span>
+                </li>
+                <li class="nav-item" data-page="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="nav-text">Reports</span>
+                </li>
+                <li class="nav-item" data-page="chat">
+                    <i class="fas fa-comments"></i>
+                    <span class="nav-text">Team Chat</span>
+                </li>
+                <li class="nav-item" data-page="admin" style="display: none;" id="adminMenuItem">
+                    <i class="fas fa-cog"></i>
+                    <span class="nav-text">Admin Tools</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-truck"></i>
+                    <span>TransLogix</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                    <div class="notification-badge">
+                        <i class="fas fa-bell fa-lg"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=3498db&color=fff" alt="User" style="width: 40px; height: 40px; border-radius: 50%;">
+                        <div>
+                            <div style="font-weight: 600;">Admin User</div>
+                            <div style="font-size: 0.8rem; color: var(--gray);">Administrator</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Content (Dynamically Loaded) -->
+            <div id="pageContent">
+                <!-- Dashboard content will be loaded here by default -->
+            </div>
+        </div>
+    </div>
 
     <script>
-        // ... existing appState and helper functions ...
+        // App state
+        const state = {
+            currentUser: null,
+            isAdmin: false,
+            currentPage: 'dashboard'
+        };
 
-        // Initialize the application
-        function initApp() {
-            const data = loadAppData();
+        // Sample data (in a real app, this would come from localStorage or API)
+        const sampleDrivers = [
+            { id: 1, name: 'John Smith', license: 'DL12345', status: 'Available', phone: '555-1234', email: 'john@example.com' },
+            { id: 2, name: 'Robert Johnson', license: 'DL67890', status: 'On Delivery', phone: '555-5678', email: 'robert@example.com' },
+            { id: 3, name: 'Michael Williams', license: 'DL11223', status: 'Available', phone: '555-9012', email: 'michael@example.com' },
+            { id: 4, name: 'David Brown', license: 'DL44556', status: 'On Leave', phone: '555-3456', email: 'david@example.com' }
+        ];
+
+        const sampleVehicles = [
+            { id: 1, regNumber: 'TRK-001', type: 'Semi-Truck', capacity: '20 tons', status: 'Available', lastService: '2023-05-15' },
+            { id: 2, regNumber: 'VAN-002', type: 'Delivery Van', capacity: '3 tons', status: 'In Use', lastService: '2023-06-01' },
+            { id: 3, regNumber: 'TRK-003', type: 'Box Truck', capacity: '10 tons', status: 'Available', lastService: '2023-05-20' },
+            { id: 4, regNumber: 'VAN-004', type: 'Refrigerated Van', capacity: '5 tons', status: 'Maintenance', lastService: '2023-04-10' }
+        ];
+
+        const sampleTenders = [
+            { id: 1, reference: 'TDR-001', client: 'ABC Company', origin: 'New York', destination: 'Los Angeles', status: 'Pending', value: '$4,500' },
+            { id: 2, reference: 'TDR-002', client: 'XYZ Logistics', origin: 'Chicago', destination: 'Miami', status: 'In Progress', value: '$3,200' },
+            { id: 3, reference: 'TDR-003', client: 'Global Suppliers', origin: 'Seattle', destination: 'Boston', status: 'Completed', value: '$5,800' },
+            { id: 4, reference: 'TDR-004', client: 'Quality Goods', origin: 'Dallas', destination: 'Denver', status: 'Pending', value: '$2,700' }
+        ];
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup event listeners
+            document.getElementById('loginBtn').addEventListener('click', login);
+            document.getElementById('showRegister').addEventListener('click', showRegister);
             
-            // Update app state
-            appState.notifications = data.notifications;
-            appState.chatMessages = data.chatMessages;
-            appState.vehicles = data.vehicles;
+            // Setup navigation
+            setupNavigation();
             
-            // Update notification badge
-            updateNotificationBadge();
+            // Initialize charts (if needed)
+            setTimeout(initCharts, 500);
+        });
+
+        // Login function
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
             
-            // Render notifications
-            renderNotifications();
+            // Simple validation
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
             
-            // Render chat messages
-            renderChatMessages();
+            // In a real app, this would validate against stored users
+            state.currentUser = email;
+            state.isAdmin = email === 'admin@example.com';
             
-            // Check for expiring inspections
-            checkExpiringInspections();
+            // Hide login, show app
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
             
-            // Setup event listeners for the app
-            setupAppEventListeners();
+            // Show admin menu if admin
+            if (state.isAdmin) {
+                document.getElementById('adminMenuItem').style.display = 'flex';
+            }
             
-            // Initialize views
-            initView();
+            // Load the dashboard
+            loadPage('dashboard');
         }
-        
-        // Setup event listeners after login
-        function setupAppEventListeners() {
-            // Set up navigation
-            document.querySelectorAll('.nav-item').forEach(item => {
+
+        // Show register form (simplified)
+        function showRegister(e) {
+            e.preventDefault();
+            alert('Registration functionality would be implemented here. For this demo, use "admin@example.com" and any password to login as admin.');
+        }
+
+        // Setup navigation
+        function setupNavigation() {
+            // Main nav items
+            document.querySelectorAll('.nav-item[data-page]').forEach(item => {
                 item.addEventListener('click', function() {
-                    const target = this.getAttribute('data-target');
-                    loadView(target);
+                    const page = this.getAttribute('data-page');
+                    loadPage(page);
+                    
+                    // Update active state
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
                 });
             });
             
-            // Initialize file uploads
-            document.getElementById('tender-upload-area').addEventListener('click', function() {
-                document.getElementById('tender-file').click();
+            // Submenu toggles
+            document.getElementById('driversMenu').addEventListener('click', function() {
+                document.getElementById('driversSubmenu').classList.toggle('show');
             });
             
-            document.getElementById('invoice-upload-area').addEventListener('click', function() {
-                document.getElementById('invoice-file').click();
+            document.getElementById('vehiclesMenu').addEventListener('click', function() {
+                document.getElementById('vehiclesSubmenu').classList.toggle('show');
             });
-            
-            // Notification and chat icons
-            document.getElementById('notification-icon').addEventListener('click', toggleNotificationPanel);
-            document.getElementById('chat-icon').addEventListener('click', toggleChatPanel);
-            
-            // Chat send button
-            document.getElementById('chat-input').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
-        }
-        
-        // Initialize views after login
-        function initView() {
-            loadView(appState.currentView);
         }
 
-        // View Management System
-        function loadView(viewName) {
-            appState.currentView = viewName;
+        // Load page content
+        function loadPage(page) {
+            state.currentPage = page;
+            const contentDiv = document.getElementById('pageContent');
+            contentDiv.innerHTML = '';
             
-            // Show loading indicator
-            const mainContent = document.getElementById('main-content');
-            mainContent.innerHTML = '<div class="view-loader"><div class="loader"></div></div>';
-            
-            // Load view after short delay
-            setTimeout(() => {
-                switch(viewName) {
-                    case 'dashboard':
-                        loadDashboardView();
-                        break;
-                    case 'drivers':
-                        loadDriversView();
-                        break;
-                    case 'tenders':
-                        loadTendersView();
-                        break;
-                    case 'payments':
-                        loadPaymentsView();
-                        break;
-                    case 'reports':
-                        loadReportsView();
-                        break;
-                    case 'admin':
-                        loadAdminView();
-                        break;
-                }
-                
-                // Update active navigation item
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                    if (item.getAttribute('data-target') === viewName) {
-                        item.classList.add('active');
-                    }
-                });
-            }, 300);
+            switch(page) {
+                case 'dashboard':
+                    loadDashboard(contentDiv);
+                    break;
+                case 'drivers':
+                    loadDrivers(contentDiv);
+                    break;
+                case 'vehicles':
+                    loadVehicles(contentDiv);
+                    break;
+                case 'tenders':
+                    loadTenders(contentDiv);
+                    break;
+                case 'invoices':
+                    loadInvoices(contentDiv);
+                    break;
+                case 'reports':
+                    loadReports(contentDiv);
+                    break;
+                case 'admin':
+                    loadAdminTools(contentDiv);
+                    break;
+                case 'chat':
+                    loadChat(contentDiv);
+                    break;
+                case 'addDriver':
+                    loadAddDriverForm(contentDiv);
+                    break;
+                case 'addVehicle':
+                    loadAddVehicleForm(contentDiv);
+                    break;
+                default:
+                    contentDiv.innerHTML = `<h2>Page not found</h2>`;
+            }
         }
-        
-        function loadDashboardView() {
-            const { tenders, drivers, payments, vehicles } = loadAppData();
-            
-            const content = `
-                <div class="dashboard-header">
-                    <h1>Dashboard</h1>
-                    <div>${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                </div>
+
+        // Page loading functions
+        function loadDashboard(container) {
+            container.innerHTML = `
+                <h1>Dashboard</h1>
+                <p>Welcome back, ${state.currentUser}. Here's what's happening today.</p>
                 
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <i class="fas fa-truck-loading icon"></i>
-                        <h3>Active Tenders</h3>
-                        <div class="value">${tenders.filter(t => t.status !== 'delivered' && t.status !== 'cancelled').length}</div>
+                <div class="dashboard">
+                    <div class="card stat-card">
+                        <div class="stat-label">Active Tenders</div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-icon"><i class="fas fa-file-contract"></i></div>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-users icon"></i>
-                        <h3>Total Drivers</h3>
-                        <div class="value">${drivers.filter(d => d.status === 'active').length}</div>
+                    <div class="card stat-card">
+                        <div class="stat-label">Vehicles in Operation</div>
+                        <div class="stat-value">8/12</div>
+                        <div class="stat-icon"><i class="fas fa-truck"></i></div>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-exclamation-triangle icon"></i>
-                        <h3>Pending Payments</h3>
-                        <div class="value">${payments.filter(p => p.status === 'pending').length}</div>
+                    <div class="card stat-card">
+                        <div class="stat-label">Drivers Available</div>
+                        <div class="stat-value">5/10</div>
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-euro-sign icon"></i>
-                        <h3>Monthly Revenue</h3>
-                        <div class="value">€${payments
-                            .filter(p => new Date(p.issueDate) >= new Date(Date.now() - 30*24*60*60*1000) && p.status === 'paid')
-                            .reduce((sum, p) => sum + p.amount, 0)
-                            .toFixed(2)}</div>
+                    <div class="card stat-card">
+                        <div class="stat-label">Revenue This Month</div>
+                        <div class="stat-value">$42,560</div>
+                        <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
                     </div>
                 </div>
                 
-                <div class="section">
-                    <div class="section-header">
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    <div class="card">
                         <h2>Recent Tenders</h2>
-                        <button class="btn btn-primary" onclick="openModal('tender-modal')">
-                            <i class="fas fa-plus"></i> New Tender
-                        </button>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Route</th>
-                                <th>Driver</th>
-                                <th>Load %</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tenders.slice(0, 5).map(tender => `
-                                <tr>
-                                    <td>#${tender.id}</td>
-                                    <td>${tender.origin} to ${tender.destination}</td>
-                                    <td>${tender.driver || 'Unassigned'}</td>
-                                    <td>${tender.loadPercentage}%</td>
-                                    <td><span class="status-badge status-${tender.status.replace(' ', '_')}">
-                                        ${tender.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                    </span></td>
-                                    <td>
-                                        <button class="btn btn-primary" style="padding: 5px 10px;" onclick="viewTender(${tender.id})">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Upcoming Inspections</h2>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Vehicle</th>
-                                <th>Type</th>
-                                <th>Inspection Due</th>
-                                <th>OC Due</th>
-                                <th>Driver</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${vehicles.slice(0, 5).map(vehicle => {
-                                const driver = drivers.find(d => d.id === vehicle.driverId);
-                                const today = new Date();
-                                const inspectionDate = new Date(vehicle.inspectionExpiry);
-                                const ocDate = new Date(vehicle.ocExpiry);
-                                const inspectionDiff = Math.ceil((inspectionDate - today) / (1000 * 60 * 60 * 24));
-                                const ocDiff = Math.ceil((ocDate - today) / (1000 * 60 * 60 * 24));
-                                
-                                let inspectionStatus = 'safe';
-                                if (inspectionDiff <= 0) inspectionStatus = 'expired';
-                                else if (inspectionDiff <= 14) inspectionStatus = 'warning';
-                                
-                                let ocStatus = 'safe';
-                                if (ocDiff <= 0) ocStatus = 'expired';
-                                else if (ocDiff <= 14) ocStatus = 'warning';
-                                
-                                return `
+                        <div class="table-container">
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td>${vehicle.regNumber}</td>
-                                        <td>${vehicle.type}</td>
-                                        <td>
-                                            <span class="status-badge ${inspectionStatus === 'expired' ? 'status-overdue' : inspectionStatus === 'warning' ? 'status-pending' : 'status-delivered'}">
-                                                ${inspectionDate.toLocaleDateString()} (${inspectionDiff} days)
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="status-badge ${ocStatus === 'expired' ? 'status-overdue' : ocStatus === 'warning' ? 'status-pending' : 'status-delivered'}">
-                                                ${ocDate.toLocaleDateString()} (${ocDiff} days)
-                                            </span>
-                                        </td>
-                                        <td>${driver ? driver.firstName + ' ' + driver.lastName : 'Unassigned'}</td>
-                                        <td>
-                                            <button class="btn btn-warning btn-sm" onclick="editVehicle(${vehicle.id})">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                        </td>
+                                        <th>Reference</th>
+                                        <th>Client</th>
+                                        <th>Route</th>
+                                        <th>Status</th>
+                                        <th>Value</th>
                                     </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>TDR-023</td>
+                                        <td>Global Suppliers</td>
+                                        <td>Chicago → Miami</td>
+                                        <td><span class="status status-in-progress">In Progress</span></td>
+                                        <td>$3,800</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TDR-022</td>
+                                        <td>ABC Company</td>
+                                        <td>New York → Boston</td>
+                                        <td><span class="status status-pending">Pending</span></td>
+                                        <td>$2,500</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TDR-021</td>
+                                        <td>Quality Goods</td>
+                                        <td>Dallas → Denver</td>
+                                        <td><span class="status status-completed">Completed</span></td>
+                                        <td>$2,700</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2>Upcoming Maintenance</h2>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle</th>
+                                        <th>Type</th>
+                                        <th>Due Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>VAN-004</td>
+                                        <td>Refrigerated Van</td>
+                                        <td>2023-07-15</td>
+                                    </tr>
+                                    <tr>
+                                        <td>TRK-001</td>
+                                        <td>Semi-Truck</td>
+                                        <td>2023-07-20</td>
+                                    </tr>
+                                    <tr>
+                                        <td>VAN-002</td>
+                                        <td>Delivery Van</td>
+                                        <td>2023-07-25</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             `;
-            
-            document.getElementById('main-content').innerHTML = content;
         }
-        
-        // Implement missing view functions
-        function loadDriversView() {
-            const { drivers } = loadAppData();
-            
-            const content = `
-                <div class="dashboard-header">
+
+        function loadDrivers(container) {
+            container.innerHTML = `
+                <div class="management-header">
                     <h1>Driver Management</h1>
-                    <button class="btn btn-primary" onclick="openModal('driver-modal')">
+                    <button class="btn btn-primary" onclick="loadPage('addDriver')">
                         <i class="fas fa-plus"></i> Add Driver
                     </button>
                 </div>
                 
-                <div class="section">
+                <div class="table-container">
                     <table>
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Contact</th>
                                 <th>License</th>
+                                <th>Contact</th>
                                 <th>Status</th>
-                                <th>Vehicle</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${drivers.map(driver => `
+                            ${sampleDrivers.map(driver => `
                                 <tr>
-                                    <td>${driver.firstName} ${driver.lastName}</td>
-                                    <td>${driver.contact}</td>
+                                    <td>${driver.name}</td>
                                     <td>${driver.license}</td>
-                                    <td><span class="status-badge ${driver.status === 'active' ? 'status-delivered' : 'status-cancelled'}">
-                                        ${driver.status.toUpperCase()}
-                                    </span></td>
-                                    <td>${driver.truck || 'N/A'}</td>
+                                    <td>${driver.phone}<br>${driver.email}</td>
+                                    <td><span class="status status-${driver.status === 'Available' ? 'completed' : driver.status === 'On Delivery' ? 'in-progress' : 'pending'}">${driver.status}</span></td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm" onclick="editDriver(${driver.id})">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
+                                        <button class="btn btn-primary" style="padding: 0.3rem 0.6rem;"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-danger" style="padding: 0.3rem 0.6rem;"><i class="fas fa-trash"></i></button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -321,49 +856,40 @@
                     </table>
                 </div>
             `;
-            
-            document.getElementById('main-content').innerHTML = content;
         }
-        
-        function loadTendersView() {
-            const { tenders } = loadAppData();
-            
-            const content = `
-                <div class="dashboard-header">
-                    <h1>Tender Management</h1>
-                    <button class="btn btn-primary" onclick="openModal('tender-modal')">
-                        <i class="fas fa-plus"></i> New Tender
+
+        function loadVehicles(container) {
+            container.innerHTML = `
+                <div class="management-header">
+                    <h1>Vehicle Management</h1>
+                    <button class="btn btn-primary" onclick="loadPage('addVehicle')">
+                        <i class="fas fa-plus"></i> Add Vehicle
                     </button>
                 </div>
                 
-                <div class="section">
+                <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Route</th>
-                                <th>Driver</th>
-                                <th>Load Size</th>
-                                <th>Cargo</th>
+                                <th>Reg Number</th>
+                                <th>Type</th>
+                                <th>Capacity</th>
                                 <th>Status</th>
+                                <th>Last Service</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${tenders.map(tender => `
+                            ${sampleVehicles.map(vehicle => `
                                 <tr>
-                                    <td>#${tender.id}</td>
-                                    <td>${tender.origin} → ${tender.destination}</td>
-                                    <td>${tender.driver || 'Unassigned'}</td>
-                                    <td>${tender.loadSize} sqm</td>
-                                    <td>${tender.cargo}</td>
-                                    <td><span class="status-badge status-${tender.status.replace(' ', '_')}">
-                                        ${tender.status.replace('_', ' ').toUpperCase()}
-                                    </span></td>
+                                    <td>${vehicle.regNumber}</td>
+                                    <td>${vehicle.type}</td>
+                                    <td>${vehicle.capacity}</td>
+                                    <td><span class="status status-${vehicle.status === 'Available' ? 'completed' : vehicle.status === 'In Use' ? 'in-progress' : 'pending'}">${vehicle.status}</span></td>
+                                    <td>${vehicle.lastService}</td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm" onclick="viewTender(${tender.id})">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
+                                        <button class="btn btn-primary" style="padding: 0.3rem 0.6rem;"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-danger" style="padding: 0.3rem 0.6rem;"><i class="fas fa-trash"></i></button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -371,451 +897,582 @@
                     </table>
                 </div>
             `;
-            
-            document.getElementById('main-content').innerHTML = content;
         }
-        
-        function loadPaymentsView() {
-            const { payments } = loadAppData();
-            
-            const content = `
-                <div class="dashboard-header">
-                    <h1>Payment Management</h1>
-                    <button class="btn btn-primary" onclick="openModal('payment-modal')">
-                        <i class="fas fa-plus"></i> Add Payment
-                    </button>
-                </div>
+
+        function loadTenders(container) {
+            container.innerHTML = `
+                <h1>Tender Management</h1>
+                <p>Manage your transport tenders and contracts.</p>
                 
-                <div class="section">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Invoice #</th>
-                                <th>Tender ID</th>
-                                <th>Amount</th>
-                                <th>Issue Date</th>
-                                <th>Due Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${payments.map(payment => {
-                                const dueDate = new Date(payment.issueDate);
-                                dueDate.setDate(dueDate.getDate() + payment.dueDays);
-                                
-                                return `
-                                <tr>
-                                    <td>${payment.invoiceNumber}</td>
-                                    <td>#${payment.tenderId}</td>
-                                    <td>${payment.currency}${payment.amount.toFixed(2)}</td>
-                                    <td>${new Date(payment.issueDate).toLocaleDateString()}</td>
-                                    <td>${dueDate.toLocaleDateString()}</td>
-                                    <td><span class="status-badge ${payment.status === 'paid' ? 'status-paid' : 'status-pending'}">
-                                        ${payment.status.toUpperCase()}
-                                    </span></td>
-                                    <td>
-                                        <button class="btn btn-primary btn-sm">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
-                                    </td>
-                                </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            
-            document.getElementById('main-content').innerHTML = content;
-        }
-        
-        function loadReportsView() {
-            const content = `
-                <div class="dashboard-header">
-                    <h1>Reports</h1>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Financial Reports</h2>
-                        <div>
-                            <button class="btn btn-primary" onclick="generatePDFReport('financial')">
-                                <i class="fas fa-file-pdf"></i> Export PDF
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <canvas id="finance-chart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <h2>Performance Reports</h2>
-                        <div>
-                            <button class="btn btn-primary" onclick="generatePDFReport('performance')">
-                                <i class="fas fa-file-pdf"></i> Export PDF
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="chart-container">
-                        <canvas id="performance-chart"></canvas>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('main-content').innerHTML = content;
-            
-            // Initialize charts
-            setTimeout(() => {
-                renderFinanceChart();
-                renderPerformanceChart();
-            }, 500);
-        }
-        
-        function loadAdminView() {
-            const { users } = loadAppData();
-            
-            const content = `
-                <div class="dashboard-header">
-                    <h1>Administration</h1>
-                    <button class="btn btn-primary" onclick="openModal('user-modal')">
-                        <i class="fas fa-plus"></i> Manage Users
-                    </button>
-                </div>
-                
-                <div class="section">
-                    <div class="section-header">
-                        <h2>GitHub Sync</h2>
-                    </div>
-                    <div class="github-sync">
-                        <div class="form-group">
-                            <label>Repository URL</label>
-                            <input type="text" id="github-repo" class="form-control" placeholder="https://github.com/username/repo">
-                        </div>
-                        <div class="form-group">
-                            <label>Access Token</label>
-                            <input type="password" id="github-token" class="form-control" placeholder="GitHub personal access token">
-                        </div>
-                        <div class="form-group">
-                            <label>Data File Path</label>
-                            <input type="text" id="github-path" class="form-control" value="transport-data.json">
-                        </div>
-                        <div class="form-group">
-                            <label>Current Data</label>
-                            <textarea id="github-data" class="form-control" rows="5" readonly>${JSON.stringify(loadAppData(), null, 2)}</textarea>
-                        </div>
-                        <button class="btn btn-primary" onclick="syncWithGitHub()">
-                            <i class="fas fa-sync"></i> Sync with GitHub
+                <div class="management-header">
+                    <div>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus"></i> New Tender
                         </button>
-                        <div id="sync-status" class="sync-status sync-pending">Sync not started</div>
+                        <button class="btn" style="background-color: #eee; margin-left: 0.5rem;">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                    </div>
+                    <div>
+                        <input type="text" class="form-control" placeholder="Search tenders..." style="width: 250px;">
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Client</th>
+                                <th>Origin</th>
+                                <th>Destination</th>
+                                <th>Status</th>
+                                <th>Value</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sampleTenders.map(tender => `
+                                <tr>
+                                    <td>${tender.reference}</td>
+                                    <td>${tender.client}</td>
+                                    <td>${tender.origin}</td>
+                                    <td>${tender.destination}</td>
+                                    <td><span class="status status-${tender.status === 'Pending' ? 'pending' : tender.status === 'In Progress' ? 'in-progress' : 'completed'}">${tender.status}</span></td>
+                                    <td>${tender.value}</td>
+                                    <td>
+                                        <button class="btn btn-primary" style="padding: 0.3rem 0.6rem;"><i class="fas fa-eye"></i></button>
+                                        <button class="btn" style="background-color: #eee; padding: 0.3rem 0.6rem;"><i class="fas fa-edit"></i></button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function loadInvoices(container) {
+            container.innerHTML = `
+                <h1>Invoice Management</h1>
+                <p>Manage billing and payments.</p>
+                
+                <div class="dashboard" style="margin-top: 1.5rem;">
+                    <div class="card stat-card">
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-value">$86,420</div>
+                        <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-label">Pending Invoices</div>
+                        <div class="stat-value">8</div>
+                        <div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-label">Overdue Payments</div>
+                        <div class="stat-value">3</div>
+                        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h2>Recent Invoices</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Invoice #</th>
+                                    <th>Client</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>INV-2023-056</td>
+                                    <td>Global Suppliers</td>
+                                    <td>2023-06-15</td>
+                                    <td>$5,800</td>
+                                    <td><span class="status status-completed">Paid</span></td>
+                                    <td>
+                                        <button class="btn btn-primary" style="padding: 0.3rem 0.6rem;"><i class="fas fa-download"></i></button>
+                                        <button class="btn" style="background-color: #eee; padding: 0.3rem 0.6rem;"><i class="fas fa-print"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>INV-2023-057</td>
+                                    <td>ABC Company</td>
+                                    <td>2023-06-18</td>
+                                    <td>$4,500</td>
+                                    <td><span class="status status-pending">Pending</span></td>
+                                    <td>
+                                        <button class="btn btn-primary" style="padding: 0.3rem 0.6rem;"><i class="fas fa-download"></i></button>
+                                        <button class="btn" style="background-color: #eee; padding: 0.3rem 0.6rem;"><i class="fas fa-print"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>INV-2023-058</td>
+                                    <td>XYZ Logistics</td>
+                                    <td>2023-06-20</td>
+                                    <td>$3,200</td>
+                                    <td><span class="status status-in-progress">Processing</span></td>
+                                    <td>
+                                        <button class="btn btn-primary" style="padding: 0.3rem 0.6rem;"><i class="fas fa-download"></i></button>
+                                        <button class="btn" style="background-color: #eee; padding: 0.3rem 0.6rem;"><i class="fas fa-print"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadReports(container) {
+            container.innerHTML = `
+                <h1>Reports & Analytics</h1>
+                <p>Analyze performance metrics and business insights.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                    <div class="chart-container">
+                        <h2>Monthly Revenue</h2>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h2>Tender Status Distribution</h2>
+                        <canvas id="tenderChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h2>Vehicle Utilization</h2>
+                        <canvas id="utilizationChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h2>Driver Performance</h2>
+                        <canvas id="driverChart"></canvas>
                     </div>
                 </div>
             `;
             
-            document.getElementById('main-content').innerHTML = content;
+            // Initialize charts after a short delay to allow DOM to render
+            setTimeout(initCharts, 100);
         }
-        
-        // Implement missing functions
-        function renderFinanceChart() {
-            const ctx = document.getElementById('finance-chart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Revenue',
-                        data: [12000, 19000, 15000, 18000, 22000, 24000],
-                        borderColor: '#3498db',
-                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-        
-        function renderPerformanceChart() {
-            const ctx = document.getElementById('performance-chart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['John Smith', 'Emma Johnson', 'Michael Brown', 'Sarah Davis'],
-                    datasets: [{
-                        label: 'Completed Tenders',
-                        data: [12, 8, 10, 7],
-                        backgroundColor: '#27ae60'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-        
-        function generatePDFReport(type) {
-            alert(`Generating ${type} report...`);
-            // Actual PDF generation would go here
-        }
-        
-        function viewTender(id) {
-            const { tenders } = loadAppData();
-            const tender = tenders.find(t => t.id === id);
-            
-            if (tender) {
-                const content = `
-                    <h3>Tender #${tender.id}</h3>
-                    <div class="vehicle-info">
-                        <div class="vehicle-row">
-                            <div class="vehicle-label">Origin:</div>
-                            <div>${tender.origin}</div>
-                        </div>
-                        <div class="vehicle-row">
-                            <div class="vehicle-label">Destination:</div>
-                            <div>${tender.destination}</div>
-                        </div>
-                        <div class="vehicle-row">
-                            <div class="vehicle-label">Driver:</div>
-                            <div>${tender.driver || 'Not assigned'}</div>
-                        </div>
-                        <div class="vehicle-row">
-                            <div class="vehicle-label">Load Size:</div>
-                            <div>${tender.loadSize} sqm</div>
-                        </div>
-                        <div class="vehicle-row">
-                            <div class="vehicle-label">Cargo:</div>
-                            <div>${tender.cargo}</div>
-                        </div>
-                        <div class="vehicle-row">
-                            <div class="vehicle-label">Status:</div>
-                            <div><span class="status-badge status-${tender.status.replace(' ', '_')}">
-                                ${tender.status.toUpperCase()}
-                            </span></div>
+
+        function loadAdminTools(container) {
+            container.innerHTML = `
+                <h1>Administration Tools</h1>
+                <p>System configuration and user management.</p>
+                
+                <div class="dashboard" style="margin-top: 1.5rem;">
+                    <div class="card" style="grid-column: span 2;">
+                        <h2>User Management</h2>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Last Login</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Admin User</td>
+                                        <td>admin@example.com</td>
+                                        <td>Administrator</td>
+                                        <td>Today, 09:45</td>
+                                        <td><span class="status status-completed">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-primary" style="padding: 0.3rem 0.6rem;"><i class="fas fa-edit"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Manager One</td>
+                                        <td>manager@example.com</td>
+                                        <td>Operations Manager</td>
+                                        <td>Today, 08:30</td>
+                                        <td><span class="status status-completed">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-primary" style="padding: 0.3rem 0.6rem;"><i class="fas fa-edit"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dispatcher User</td>
+                                        <td>dispatcher@example.com</td>
+                                        <td>Dispatcher</td>
+                                        <td>Yesterday, 17:45</td>
+                                        <td><span class="status status-completed">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-primary" style="padding: 0.3rem 0.6rem;"><i class="fas fa-edit"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                `;
-                
-                document.getElementById('details-tab').innerHTML = content;
-                document.getElementById('tender-id').value = tender.id;
-                document.getElementById('issue-tender-id').value = tender.id;
-                openModal('view-tender-modal');
-            }
-        }
-        
-        function editDriver(id) {
-            const { drivers } = loadAppData();
-            const driver = drivers.find(d => d.id === id);
-            
-            if (driver) {
-                document.getElementById('first_name').value = driver.firstName;
-                document.getElementById('last_name').value = driver.lastName;
-                document.getElementById('contact').value = driver.contact;
-                document.getElementById('license').value = driver.license;
-                document.getElementById('truck_number').value = driver.truck || '';
-                document.getElementById('trailer_number').value = driver.trailer || '';
-                document.getElementById('status').value = driver.status;
-                
-                // Clear existing fuel card entries
-                document.getElementById('fuel-cards-container').innerHTML = '';
-                
-                // Add fuel cards
-                driver.fuelCards.forEach(card => {
-                    addFuelCardField(card);
-                });
-                
-                openModal('driver-modal');
-            }
-        }
-        
-        function editVehicle(id) {
-            const { vehicles } = loadAppData();
-            const vehicle = vehicles.find(v => v.id === id);
-            
-            if (vehicle) {
-                document.getElementById('vehicle-type').value = vehicle.type;
-                document.getElementById('vehicle-reg').value = vehicle.regNumber;
-                document.getElementById('oc-expiry').value = vehicle.ocExpiry;
-                document.getElementById('inspection-expiry').value = vehicle.inspectionExpiry;
-                document.getElementById('alert-days').value = vehicle.alertDays;
-                openModal('vehicle-modal');
-            }
-        }
-        
-        function addFuelCardField(card = {}) {
-            const container = document.getElementById('fuel-cards-container');
-            const newEntry = document.createElement('div');
-            newEntry.className = 'fuel-card-entry';
-            newEntry.innerHTML = `
-                <div class="form-group">
-                    <label>Card Number</label>
-                    <input type="text" name="card_number[]" value="${card.number || ''}" placeholder="e.g., 1234 5678 9012 3456">
-                </div>
-                <div class="form-group">
-                    <label>PIN</label>
-                    <input type="text" name="card_pin[]" value="${card.pin || ''}" placeholder="e.g., 1234">
-                </div>
-                <div class="form-group">
-                    <label>Expiry Date</label>
-                    <input type="date" name="card_expiry[]" value="${card.expiry || ''}">
-                </div>
-                <div class="form-group">
-                    <label>No Expiry Date</label>
-                    <input type="checkbox" name="card_no_expiry[]" ${card.noExpiry ? 'checked' : ''}>
+                    
+                    <div class="card">
+                        <h2>System Settings</h2>
+                        <div class="form-group">
+                            <label>Company Name</label>
+                            <input type="text" class="form-control" value="TransLogix Inc.">
+                        </div>
+                        <div class="form-group">
+                            <label>Default Currency</label>
+                            <select class="form-control">
+                                <option>US Dollar (USD)</option>
+                                <option>Euro (EUR)</option>
+                                <option>British Pound (GBP)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date Format</label>
+                            <select class="form-control">
+                                <option>YYYY-MM-DD</option>
+                                <option>MM/DD/YYYY</option>
+                                <option>DD/MM/YYYY</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary">Save Settings</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h2>Data Management</h2>
+                        <p>Export and backup your company data.</p>
+                        <button class="btn btn-success" style="width: 100%; margin-bottom: 1rem;">
+                            <i class="fas fa-download"></i> Export to CSV
+                        </button>
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                            <i class="fas fa-file-export"></i> Backup to GitHub
+                        </button>
+                        <button class="btn btn-danger" style="width: 100%;">
+                            <i class="fas fa-trash"></i> Clear Test Data
+                        </button>
+                    </div>
                 </div>
             `;
-            container.appendChild(newEntry);
         }
-        
-        // Chat functions
-        function toggleNotificationPanel() {
-            const panel = document.getElementById('notification-panel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-        }
-        
-        function closeNotificationPanel() {
-            document.getElementById('notification-panel').style.display = 'none';
-        }
-        
-        function renderNotifications() {
-            const container = document.getElementById('notification-list');
-            if (!container) return;
-            
-            container.innerHTML = appState.notifications.map(notification => `
-                <div class="notification-item ${notification.read ? '' : 'unread'}" onclick="markNotificationRead(${notification.id})">
-                    <div class="notification-title">
-                        <i class="fas fa-${notification.type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-                        ${notification.title}
+
+        function loadChat(container) {
+            container.innerHTML = `
+                <h1>Team Chat</h1>
+                <p>Communicate with your team in real-time.</p>
+                
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <h2>General Channel</h2>
                     </div>
-                    <div class="notification-message">${notification.message}</div>
-                    <div class="notification-time">${new Date(notification.timestamp).toLocaleString()}</div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message message-received">
+                            <div class="message-sender">John Smith</div>
+                            <div class="message-content">Has anyone seen the delivery schedule for tomorrow?</div>
+                        </div>
+                        <div class="message message-sent">
+                            <div class="message-content">I just uploaded it to the shared drive.</div>
+                        </div>
+                        <div class="message message-received">
+                            <div class="message-sender">Robert Johnson</div>
+                            <div class="message-content">Thanks! The Houston delivery is delayed due to weather, we might need to reschedule.</div>
+                        </div>
+                    </div>
+                    <div class="message-input">
+                        <input type="text" id="messageInput" placeholder="Type your message...">
+                        <button class="btn btn-primary" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                    </div>
                 </div>
-            `).join('');
+            `;
         }
-        
-        function updateNotificationBadge() {
-            const unread = appState.notifications.filter(n => !n.read).length;
-            const badge = document.getElementById('notification-count');
-            if (badge) badge.textContent = unread;
+
+        function loadAddDriverForm(container) {
+            container.innerHTML = `
+                <div class="management-header">
+                    <h1>Add New Driver</h1>
+                    <button class="btn" onclick="loadPage('drivers')">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </button>
+                </div>
+                
+                <div class="form-container">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" class="form-control" placeholder="Enter driver's full name">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>License Number</label>
+                            <input type="text" class="form-control" placeholder="Driver's license number">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>License Expiry</label>
+                            <input type="date" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" class="form-control" placeholder="Contact number">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" class="form-control" placeholder="Email address">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea class="form-control" rows="3" placeholder="Full address"></textarea>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Employment Date</label>
+                            <input type="date" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select class="form-control">
+                                <option>Available</option>
+                                <option>On Delivery</option>
+                                <option>On Leave</option>
+                                <option>Unavailable</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Driver</button>
+                </div>
+            `;
         }
-        
-        function toggleChatPanel() {
-            const panel = document.getElementById('chat-panel');
-            if (panel) {
-                panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
-                // Scroll to bottom when opening
-                if (panel.style.display === 'flex') {
-                    const messages = document.getElementById('chat-messages');
-                    messages.scrollTop = messages.scrollHeight;
-                }
+
+        function loadAddVehicleForm(container) {
+            container.innerHTML = `
+                <div class="management-header">
+                    <h1>Add New Vehicle</h1>
+                    <button class="btn" onclick="loadPage('vehicles')">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </button>
+                </div>
+                
+                <div class="form-container">
+                    <div class="form-group">
+                        <label>Registration Number</label>
+                        <input type="text" class="form-control" placeholder="Vehicle registration number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Vehicle Type</label>
+                        <select class="form-control">
+                            <option>Semi-Truck</option>
+                            <option>Box Truck</option>
+                            <option>Delivery Van</option>
+                            <option>Refrigerated Truck</option>
+                            <option>Flatbed Truck</option>
+                            <option>Tanker</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Make</label>
+                            <input type="text" class="form-control" placeholder="Vehicle make">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Model</label>
+                            <input type="text" class="form-control" placeholder="Vehicle model">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Year</label>
+                            <input type="number" class="form-control" placeholder="Manufacturing year">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Capacity</label>
+                            <input type="text" class="form-control" placeholder="e.g., 10 tons">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Current Status</label>
+                        <select class="form-control">
+                            <option>Available</option>
+                            <option>In Use</option>
+                            <option>Maintenance</option>
+                            <option>Out of Service</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Last Service Date</label>
+                            <input type="date" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Next Service Due</label>
+                            <input type="date" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Vehicle</button>
+                </div>
+            `;
+        }
+
+        // Initialize charts
+        function initCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart')?.getContext('2d');
+            if (revenueCtx) {
+                new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Monthly Revenue ($)',
+                            data: [32000, 35000, 38200, 40500, 42300, 45600],
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
             }
-        }
-        
-        function closeChatPanel() {
-            const panel = document.getElementById('chat-panel');
-            if (panel) panel.style.display = 'none';
-        }
-        
-        function renderChatMessages() {
-            const container = document.getElementById('chat-messages');
-            if (!container) return;
             
-            container.innerHTML = appState.chatMessages.map(msg => `
-                <div class="message ${msg.sender === appState.currentUser.name ? 'sent' : 'received'}">
-                    <div class="message-sender">${msg.sender}</div>
-                    <div class="message-text">${msg.message}</div>
-                    <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</div>
-                </div>
-            `).join('');
-            
-            // Scroll to bottom
-            container.scrollTop = container.scrollHeight;
-        }
-        
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            if (!input) return;
-            
-            const message = input.value.trim();
-            if (message && appState.currentUser) {
-                appState.chatMessages.push({
-                    id: Date.now(),
-                    sender: appState.currentUser.name,
-                    message: message,
-                    timestamp: new Date().toISOString()
+            // Tender Status Chart
+            const tenderCtx = document.getElementById('tenderChart')?.getContext('2d');
+            if (tenderCtx) {
+                new Chart(tenderCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Completed', 'In Progress', 'Pending'],
+                        datasets: [{
+                            data: [15, 8, 5],
+                            backgroundColor: ['#27ae60', '#3498db', '#f39c12'],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
                 });
-                
-                // Save to localStorage
-                saveAppData({
-                    ...loadAppData(),
-                    chatMessages: appState.chatMessages
+            }
+            
+            // Utilization Chart
+            const utilizationCtx = document.getElementById('utilizationChart')?.getContext('2d');
+            if (utilizationCtx) {
+                new Chart(utilizationCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Semi-Trucks', 'Box Trucks', 'Delivery Vans', 'Refrigerated'],
+                        datasets: [{
+                            label: 'Utilization Rate (%)',
+                            data: [78, 85, 92, 65],
+                            backgroundColor: '#9b59b6',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
                 });
-                
-                // Update UI
-                renderChatMessages();
-                input.value = '';
+            }
+            
+            // Driver Performance Chart
+            const driverCtx = document.getElementById('driverChart')?.getContext('2d');
+            if (driverCtx) {
+                new Chart(driverCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['On-time Delivery', 'Safety', 'Fuel Efficiency', 'Customer Feedback', 'Route Adherence'],
+                        datasets: [{
+                            label: 'John Smith',
+                            data: [92, 88, 85, 90, 94],
+                            fill: true,
+                            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                            borderColor: '#3498db',
+                            pointBackgroundColor: '#3498db'
+                        }, {
+                            label: 'Robert Johnson',
+                            data: [85, 90, 82, 88, 90],
+                            fill: true,
+                            backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                            borderColor: '#2ecc71',
+                            pointBackgroundColor: '#2ecc71'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    display: true
+                                },
+                                suggestedMin: 0,
+                                suggestedMax: 100
+                            }
+                        }
+                    }
+                });
             }
         }
 
-        // Login function
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        // Chat function
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
             
-            const { users } = loadAppData();
-            const user = users.find(u => u.username === username && u.password === password);
+            const messagesDiv = document.getElementById('chatMessages');
+            messagesDiv.innerHTML += `
+                <div class="message message-sent">
+                    <div class="message-content">${message}</div>
+                </div>
+            `;
             
-            if (user) {
-                appState.currentUser = user;
-                
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('app-container').style.display = 'block';
-                document.getElementById('current-user').textContent = user.name;
-                document.getElementById('current-role').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
-                
-                // Initialize the app after login
-                initApp();
-            } else {
-                alert('Invalid credentials. Please try again.');
-            }
+            input.value = '';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            // Simulate reply after a short delay
+            setTimeout(() => {
+                messagesDiv.innerHTML += `
+                    <div class="message message-received">
+                        <div class="message-sender">Robert Johnson</div>
+                        <div class="message-content">Thanks for the update!</div>
+                    </div>
+                `;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }, 1000);
         }
-        
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add chat icon ID if missing
-            if (!document.getElementById('chat-icon')) {
-                const chatIcon = document.querySelector('.chat-icon');
-                if (chatIcon) chatIcon.id = 'chat-icon';
-            }
-            
-            // Initialize demo data if needed
-            if (!localStorage.getItem('transport_users')) {
-                initDemoData();
-            }
-            
-            // Add login button event listener
-            const loginBtn = document.querySelector('.btn.btn-primary.btn-block');
-            if (loginBtn) {
-                loginBtn.addEventListener('click', login);
-            }
-        });
     </script>
 </body>
 </html>
