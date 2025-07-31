@@ -1,0 +1,11 @@
+<div class="page">
+  <h2>Tenders Management</h2>
+  <button onclick="Tenders.create()">Add Tender</button>
+  <table>
+    <thead><tr><th>Load Date</th><th>Place</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody id="tendersTable"></tbody>
+  </table>
+  <div id="dropzone" ondrop="Tenders.handleDrop(event)">Drop documents here</div>
+  <script src="../assets/js/tenders.js"></script>
+  <script>Tenders.load();</script>
+</div>
