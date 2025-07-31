@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TransForge™ - Dashboard</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+  <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/notifications.js" defer></script>
+  <!-- CDNs for dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"></script>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Header -->
+    <header include-html="templates/header.html"></header>
+    
+    <!-- Sidebar -->
+    <aside include-html="templates/sidebar.html"></aside>
+    
+    <!-- Main Content Container (Subpages load here) -->
+    <main id="content">
+      <h1>Dashboard</h1>
+      <p>Welcome! Basic stats: Total Drivers: <span id="totalDrivers">0</span>, Pending Tenders: <span id="pendingTenders">0</span></p>
+      <!-- Load dynamic content via JS -->
+    </main>
+    
+    <!-- Footer -->
+    <footer include-html="templates/footer.html"></footer>
+  </div>
+</body>
+</html>
