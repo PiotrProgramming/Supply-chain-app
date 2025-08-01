@@ -1,169 +1,35 @@
 <div class="page-content">
   <div class="page-header">
     <h2>Drivers & Vehicles Management</h2>
-    <div>
-      <button class="btn" onclick="showAddDriverForm()">
-        <i class="fas fa-user-plus"></i> Add Driver
-      </button>
-      <button class="btn" onclick="showAddVehicleForm()">
-        <i class="fas fa-truck"></i> Add Vehicle
-      </button>
-      <button class="btn" onclick="showAssignVehiclesMode()">
-        <i class="fas fa-link"></i> Assign Vehicles
-      </button>
-    </div>
+    <button class="btn" onclick="showAddDriverForm()">Add New Driver</button>
   </div>
 
-  <!-- Tabs Navigation -->
-  <div class="tabs">
-    <div class="tab active" data-tab="drivers-tab">Drivers</div>
-    <div class="tab" data-tab="vehicles-tab">Vehicles</div>
-    <div class="tab" data-tab="cards-tab">Cards</div>
-    <div class="tab" data-tab="settings-tab">Settings</div>
-  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Vehicle</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="driversTable">
+      <!-- Drivers will be listed here -->
+    </tbody>
+  </table>
+</div>
 
-  <!-- Tab Content Containers -->
-  <div class="tab-content active" id="drivers-tab">
-    <div class="search-bar">
-      <input type="text" id="driverSearch" placeholder="Search drivers..." class="form-control">
+<!-- Modal for Add/Edit Driver -->
+<div id="driverModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="driverModalTitle">Add New Driver</h3>
+      <span class="close-btn" onclick="closeModal()">×</span>
     </div>
-    <table class="table" id="driversTable">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>Status</th>
-          <th>Vehicle</th>
-          <th>Cards</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Drivers data will be loaded here -->
-      </tbody>
-    </table>
-  </div>
-
-  <div class="tab-content" id="vehicles-tab">
-    <div class="search-bar">
-      <input type="text" id="vehicleSearch" placeholder="Search vehicles..." class="form-control">
-    </div>
-    <table class="table" id="vehiclesTable">
-      <thead>
-        <tr>
-          <th>License Plate</th>
-          <th>Type</th>
-          <th>Max Load (tons)</th>
-          <th>Insurance Expires</th>
-          <th>Inspection Expires</th>
-          <th>Assigned To</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Vehicles data will be loaded here -->
-      </tbody>
-    </table>
-  </div>
-  
-  <div class="tab-content" id="cards-tab">
-    <div class="flex-container">
-      <div class="flex-item">
-        <h3>Card Types</h3>
-        <button class="btn" onclick="showAddCardTypeForm()">
-          <i class="fas fa-plus"></i> Add Card Type
-        </button>
-        <table class="table" id="cardTypesTable">
-          <thead>
-            <tr>
-              <th>Type Name</th>
-              <th>Description</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Card types data will be loaded here -->
-          </tbody>
-        </table>
-      </div>
-      <div class="flex-item">
-        <h3>Driver Cards</h3>
-        <table class="table" id="cardsTable">
-          <thead>
-            <tr>
-              <th>Card Type</th>
-              <th>Card Number</th>
-              <th>Expiry Date</th>
-              <th>Assigned Driver</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Cards data will be loaded here -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="tab-content" id="settings-tab">
-    <div class="card">
-      <h3>Expiry Notification Settings</h3>
-      <p>Set how many days before a document expires employees should be notified.</p>
-      <div class="form-group">
-        <label>Insurance Expiry Notification (days):</label>
-        <input type="number" id="insuranceNotifyDays" class="form-control" min="1" max="90" value="30">
-      </div>
-      <div class="form-group">
-        <label>Vehicle Inspection Expiry Notification (days):</label>
-        <input type="number" id="inspectionNotifyDays" class="form-control" min="1" max="90" value="30">
-      </div>
-      <button class="btn" onclick="saveExpirySettings()">
-        <i class="fas fa-save"></i> Save Settings
-      </button>
-    </div>
-    <div class="card" style="margin-top: 1.5rem;">
-      <h3>Vehicle Types</h3>
-      <p>Manage the different types of vehicles and their max load capacity.</p>
-      <button class="btn" onclick="showAddVehicleTypeForm()">
-        <i class="fas fa-plus"></i> Add Vehicle Type
-      </button>
-      <table class="table" id="vehicleTypesTable">
-        <thead>
-          <tr>
-            <th>Type Name</th>
-            <th>Max Load (tons)</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Vehicle types data will be loaded here -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Drag-and-Drop Assignment Area (Hidden by default) -->
-  <div id="assignVehiclesContainer" class="tab-content">
-    <div class="page-header">
-      <h3>Assign Vehicles with Drag & Drop</h3>
-      <button class="btn btn-secondary" onclick="hideAssignVehiclesMode()">
-        <i class="fas fa-times"></i> Close
-      </button>
-    </div>
-    <div class="assignment-container">
-      <div class="assignment-column">
-        <h4>Available Vehicles</h4>
-        <div id="availableVehiclesList" class="droppable-area" ondrop="drop(event, this)" ondragover="allowDrop(event)">
-          <!-- Draggable vehicles will be loaded here -->
-        </div>
-      </div>
-      <div class="assignment-column">
-        <h4>Drivers</h4>
-        <div id="driversAssignmentList">
-          <!-- Droppable driver containers will be loaded here -->
-        </div>
-      </div>
+    <div id="driverModalBody">
+      <!-- Form will be inserted here -->
     </div>
   </div>
 </div>
+
+<script src="assets/js/drivers.js"></script>
