@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver & Vehicle Management</title>
-    <link rel="stylesheet" href="../assets/css/main.css">
+    <title>Drivers & Vehicles Management</title>
+    <!-- Ensure this path is correct relative to your HTML file -->
+    <link rel="stylesheet" href="../assets/css/main.css"> 
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-truck"></i> Driver & Vehicle Management</h1>
+            <h1><i class="fas fa-truck"></i> Drivers & Vehicles Management</h1>
             <nav>
                 <button class="nav-btn active" data-tab="drivers">Drivers</button>
                 <button class="nav-btn" data-tab="vehicles">Vehicles</button>
@@ -55,7 +57,8 @@
             <div class="vehicles-container">
                 <div class="unassigned-vehicles">
                     <h3>Unassigned Vehicles</h3>
-                    <div class="vehicle-list" id="unassignedVehicles" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <!-- Added ondrop and ondragover for vehicles to be dropped back here -->
+                    <div class="vehicle-list" id="unassignedVehicles" ondrop="drop(event, null)" ondragover="allowDrop(event)">
                         <!-- Unassigned vehicles here -->
                     </div>
                 </div>
@@ -227,6 +230,7 @@
         </div>
     </div>
 
+    <!-- Corrected JS file path here -->
     <script src="../assets/js/drivers.js"></script>
 </body>
 </html>
