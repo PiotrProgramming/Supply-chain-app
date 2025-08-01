@@ -1,105 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TransForge™ - Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/main.css">
-</head>
-<body>
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="logo-section">
-      <h2>TransForge™</h2>
-      <div class="company-name" id="companyName">Your Company</div>
-    </div>
-    <ul class="nav-menu">
-      <li class="nav-item active" data-page="dashboard">
-        <i class="fas fa-tachometer-alt"></i>
-        <span>Dashboard</span>
-      </li>
-      <li class="nav-item" data-page="drivers">
-        <i class="fas fa-users"></i>
-        <span>Drivers & Vehicles</span>
-      </li>
-      <li class="nav-item" data-page="tenders">
-        <i class="fas fa-file-contract"></i>
-        <span>Tenders</span>
-      </li>
-      <li class="nav-item" data-page="invoices">
-        <i class="fas fa-file-invoice-dollar"></i>
-        <span>Invoices</span>
-      </li>
-      <li class="nav-item" data-page="reports">
-        <i class="fas fa-chart-bar"></i>
-        <span>Reports</span>
-      </li>
-      <li class="nav-item" data-page="admin" id="adminMenuItem" style="display:none;">
-        <i class="fas fa-cog"></i>
-        <span>Administration</span>
-      </li>
-      <li class="nav-item" data-page="chat">
-        <i class="fas fa-comments"></i>
-        <span>Chat</span>
-      </li>
-      <li class="nav-item" data-page="notifications">
-        <i class="fas fa-bell"></i>
-        <span>Notifications</span>
-      </li>
-    </ul>
-  </div>
-
-  <!-- Main Content Area -->
-  <div class="main-content">
-    <div class="header">
-      <div class="page-title" id="pageTitle">Dashboard</div>
-      <div class="header-actions">
-        <div class="notification-badge" onclick="loadPage('notifications')">
-          <i class="fas fa-bell"></i>
-          <span class="badge" id="notifCount">0</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <img src="https://ui-avatars.com/api/?name=User&background=2c3e50&color=fff" alt="User" class="avatar">
-          <span id="userName">User</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dynamic Page Content -->
-    <div id="pageContent">
-      <div class="loading"></div>
-    </div>
-  </div>
-
-  <!-- Modal for forms -->
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="modalTitle">Modal</h3>
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-      </div>
-      <div id="modalBody">
-        <!-- Form content will be loaded here -->
-      </div>
-    </div>
-  </div>
-
   <script>
-    // Module file mapping
-    const moduleFiles = {
-      dashboard: { html: 'pages/dashboard.html', js: null },
-      drivers: { html: 'pages/drivers.html', js: 'assets/js/drivers.js' },
-      tenders: { html: 'pages/tenders.html', js: 'assets/js/tenders.js' },
-      invoices: { html: 'pages/invoices.html', js: 'assets/js/invoices.js' },
-      reports: { html: 'pages/reports.html', js: 'assets/js/reports.js' },
-      admin: { html: 'pages/admin.html', js: 'assets/js/admin.js' },
-      chat: { html: 'pages/chat.html', js: 'assets/js/chat.js' },
-      notifications: { html: 'pages/notifications.html', js: 'assets/js/notifications.js' }
-    };
-
-    let currentModuleScript = null;
-
+    // Check if user is logged in
     document.addEventListener('DOMContentLoaded', () => {
       const user = localStorage.getItem('transforge_user');
       if (!user) {
@@ -115,65 +15,142 @@
         document.getElementById('adminMenuItem').style.display = 'block';
       }
       
+      // Setup navigation
       setupNavigation();
-      loadPage('dashboard'); // Load dashboard by default
+      
+      // Load initial page (dashboard by default)
+      loadPage('dashboard');
     });
 
+    // Helper functions for modal management
+    function openModal(title, content) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = content;
+      document.getElementById('modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+
     function setupNavigation() {
+      // Add click listeners to all nav items
       document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {
+          // Remove active class from all items
           document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          // Add active class to clicked item
           this.classList.add('active');
-          const pageName = this.dataset.page;
-          document.getElementById('pageTitle').textContent = this.textContent.trim();
-          loadPage(pageName);
+          // Load the page
+          loadPage(this.dataset.page);
         });
       });
     }
 
-    async function loadPage(pageName) {
-      const pageContent = document.getElementById('pageContent');
-      const module = moduleFiles[pageName];
+    // Module file mapping
+    const moduleFiles = {
+      dashboard: { html: 'pages/dashboard.html', js: 'assets/js/dashboard.js' },
+      drivers: { html: 'pages/drivers.html', js: 'assets/js/drivers.js' },
+      tenders: { html: 'pages/tenders.html', js: 'assets/js/tenders.js' },
+      invoices: { html: 'pages/invoices.html', js: 'assets/js/invoices.js' },
+      reports: { html: 'pages/reports.html', js: 'assets/js/reports.js' },
+      admin: { html: 'pages/admin.html', js: 'assets/js/admin.js' },
+      chat: { html: 'pages/chat.html', js: 'assets/js/chat.js' },
+      notifications: { html: 'pages/notifications.html', js: 'assets/js/notifications.js' }
+    };
 
-      if (!module) {
-        pageContent.innerHTML = '<div class="loading">Page not found.</div>';
+    function loadPage(pageName) {
+      const pageContent = document.getElementById('pageContent');
+      
+      const titles = {
+        dashboard: 'Dashboard',
+        drivers: 'Drivers & Vehicles Management',
+        tenders: 'Tenders',
+        invoices: 'Invoices',
+        reports: 'Reports',
+        admin: 'Administration',
+        chat: 'Chat',
+        notifications: 'Notifications'
+      };
+      
+      document.getElementById('pageTitle').textContent = titles[pageName] || 'Dashboard';
+      
+      if (pageName === 'dashboard') {
+        // Load the default dashboard content which is already in the HTML
+        // For simplicity, we just reload the existing content or a specific JS
+        // to update the stats.
+        pageContent.innerHTML = `
+          <div class="dashboard-grid">
+            <div class="card stat-card">
+              <div class="stat-value" id="totalDrivers">0</div>
+              <div class="stat-label">Total Drivers</div>
+              <i class="fas fa-users stat-icon"></i>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-value" id="activeVehicles">0</div>
+              <div class="stat-label">Active Vehicles</div>
+              <i class="fas fa-truck stat-icon"></i>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-value" id="pendingTenders">0</div>
+              <div class="stat-label">Pending Tenders</div>
+              <i class="fas fa-file-contract stat-icon"></i>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-value" id="revenue">0</div>
+              <div class="stat-label">Revenue</div>
+              <i class="fas fa-dollar-sign stat-icon"></i>
+            </div>
+          </div>
+        `;
+        updateDashboardStats();
         return;
       }
+      
+      // Show loading indicator
+      pageContent.innerHTML = '<div class="loading"></div>';
 
-      // Remove previous module's script
-      if (currentModuleScript) {
-        currentModuleScript.remove();
-        currentModuleScript = null;
-      }
-
-      pageContent.innerHTML = `<div class="loading"></div>`;
-
-      try {
-        const htmlResponse = await fetch(module.html);
-        if (!htmlResponse.ok) throw new Error(`Could not load ${module.html}`);
-        pageContent.innerHTML = await htmlResponse.text();
-
-        // Load module-specific JavaScript
-        if (module.js) {
-          const script = document.createElement('script');
-          script.src = module.js;
-          document.body.appendChild(script);
-          currentModuleScript = script;
-        }
-
-      } catch (error) {
-        pageContent.innerHTML = `<div class="loading" style="color:var(--danger)">Error: ${error.message}</div>`;
-        console.error(error);
+      const module = moduleFiles[pageName];
+      if (module) {
+        // Fetch and load the HTML file
+        fetch(module.html)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load ${module.html}`);
+            }
+            return response.text();
+          })
+          .then(html => {
+            pageContent.innerHTML = html;
+            
+            // Now, load and execute the corresponding JavaScript file
+            const oldScript = document.querySelector(`script[src="${module.js}"]`);
+            if (oldScript) {
+              oldScript.remove(); // Remove existing script to prevent re-execution issues
+            }
+            const script = document.createElement('script');
+            script.src = module.js;
+            document.body.appendChild(script);
+          })
+          .catch(error => {
+            pageContent.innerHTML = `<div class="card"><h3 class="text-danger">Error Loading Page</h3><p>${error.message}</p></div>`;
+          });
+      } else {
+        pageContent.innerHTML = `<div class="card"><h3 class="text-danger">Module Not Found</h3><p>The page for "${pageName}" could not be found. Please check your moduleFiles mapping.</p></div>`;
       }
     }
-
-    // Modal functions
-    function openModal(modalId) {
-      document.getElementById(modalId).style.display = 'flex';
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).style.display = 'none';
+    
+    // Function to update dashboard stats, used on initial load and by other modules
+    function updateDashboardStats() {
+      const drivers = JSON.parse(localStorage.getItem('transforge_drivers') || '[]');
+      const vehicles = JSON.parse(localStorage.getItem('transforge_vehicles') || '[]');
+      
+      if (document.getElementById('totalDrivers')) {
+        document.getElementById('totalDrivers').textContent = drivers.length;
+      }
+      if (document.getElementById('activeVehicles')) {
+        document.getElementById('activeVehicles').textContent = vehicles.length;
+      }
     }
   </script>
 </body>
