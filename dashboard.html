@@ -5,9 +5,175 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TransForge™ - Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/main.css">
   <style>
-    /* Keep your existing styles here */
+    /* Original styles from your dashboard */
+    :root {
+      --primary: #2c3e50;
+      --secondary: #3498db;
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --light: #ecf0f1;
+      --dark: #34495e;
+      --gray: #95a5a6;
+      --sidebar-width: 250px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--primary);
+      color: white;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .logo-section {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+
+    .logo-section h2 {
+      margin: 0.5rem 0;
+      font-weight: 600;
+    }
+
+    .company-name {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .nav-menu {
+      list-style: none;
+      padding: 1rem 0;
+    }
+
+    .nav-item {
+      padding: 0.8rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      border-left: 3px solid transparent;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .nav-item.active {
+      background: rgba(255,255,255,0.1);
+      border-left: 3px solid var(--secondary);
+    }
+
+    .nav-item i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .header {
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      border-radius: 8px;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .notification-badge {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--danger);
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.7rem;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+
+    /* Page Content Styles */
+    .page-content {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 2rem;
+    }
+
+    /* Loading spinner */
+    .loading {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .loading::after {
+      content: "Loading...";
+      display: inline-block;
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: "Loading"; }
+      40% { content: "Loading."; }
+      60% { content: "Loading.."; }
+      80%, 100% { content: "Loading..."; }
+    }
   </style>
 </head>
 <body>
@@ -121,7 +287,7 @@
       
       const userData = JSON.parse(user);
       
-      // SAFETY CHECKS: Make sure elements exist before setting properties
+      // Set user info
       const userNameElement = document.getElementById('userName');
       if (userNameElement) {
         userNameElement.textContent = userData.email.split('@')[0];
@@ -132,155 +298,100 @@
         companyNameElement.textContent = userData.companyName;
       }
       
-      const adminMenuItemElement = document.getElementById('adminMenuItem');
-      if (adminMenuItemElement && userData.isAdmin) {
-        adminMenuItemElement.style.display = 'block';
+      // Show admin menu if needed
+      const adminMenuItem = document.getElementById('adminMenuItem');
+      if (adminMenuItem && userData.isAdmin) {
+        adminMenuItem.style.display = 'block';
       }
       
-      // Setup navigation
+      // Initialize navigation
       setupNavigation();
       
-      // Load dashboard data
-      loadPage('dashboard');
+      // Load initial dashboard
+      loadDashboardContent();
     });
 
-    function openModal(title, content) {
-      document.getElementById('modalTitle').textContent = title;
-      document.getElementById('modalBody').innerHTML = content;
-      document.getElementById('modal').style.display = 'flex';
-    }
-
-    function closeModal() {
-      document.getElementById('modal').style.display = 'none';
-    }
-
     function setupNavigation() {
-      // Add click listeners to all nav items
       document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {
-          // Remove active class from all items
           document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-          // Add active class to clicked item
           this.classList.add('active');
-          // Load the page
           loadPage(this.dataset.page);
         });
       });
     }
 
+    function loadDashboardContent() {
+      const pageContent = document.getElementById('pageContent');
+      pageContent.innerHTML = `
+        <div class="dashboard-grid">
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Total Drivers</div>
+            <i class="fas fa-users stat-icon"></i>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Active Vehicles</div>
+            <i class="fas fa-truck stat-icon"></i>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Pending Tenders</div>
+            <i class="fas fa-file-contract stat-icon"></i>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Revenue</div>
+            <i class="fas fa-dollar-sign stat-icon"></i>
+          </div>
+        </div>
+      `;
+    }
+
     // Module file mapping
     const moduleFiles = {
-      dashboard: { html: 'pages/dashboard.html', js: 'assets/js/dashboard.js' },
-      drivers: { html: 'pages/drivers.html', js: 'assets/js/drivers.js' },
-      tenders: { html: 'pages/tenders.html', js: 'assets/js/tenders.js' },
-      invoices: { html: 'pages/invoices.html', js: 'assets/js/invoices.js' },
-      reports: { html: 'pages/reports.html', js: 'assets/js/reports.js' },
-      admin: { html: 'pages/admin.html', js: 'assets/js/admin.js' },
-      chat: { html: 'pages/chat.html', js: 'assets/js/chat.js' },
-      notifications: { html: 'pages/notifications.html', js: 'assets/js/notifications.js' }
+      drivers: 'pages/drivers.html',
+      tenders: 'pages/tenders.html',
+      invoices: 'pages/invoices.html',
+      reports: 'pages/reports.html',
+      admin: 'pages/admin.html',
+      chat: 'pages/chat.html',
+      notifications: 'pages/notifications.html'
     };
-
-    // Current script reference to prevent duplicates
-    let currentScript = null;
 
     function loadPage(pageName) {
       const pageContent = document.getElementById('pageContent');
-      
-      const titles = {
-        dashboard: 'Dashboard',
-        drivers: 'Drivers & Vehicles Management',
-        tenders: 'Tenders',
-        invoices: 'Invoices',
-        reports: 'Reports',
-        admin: 'Administration',
-        chat: 'Chat',
-        notifications: 'Notifications'
-      };
-      
       const pageTitleElement = document.getElementById('pageTitle');
+      
+      // Update page title
       if (pageTitleElement) {
-        pageTitleElement.textContent = titles[pageName] || 'Dashboard';
+        pageTitleElement.textContent = pageName === 'dashboard' ? 'Dashboard' : pageName.replace(/-/g, ' ').charAt(0).toUpperCase() + pageName.replace(/-/g, ' ').slice(1);
       }
-      
-      // Clear any existing script
-      if (currentScript) {
-        document.body.removeChild(currentScript);
-        currentScript = null;
-      }
-      
-      if (pageName === 'dashboard') {
-        // Load the default dashboard content
-        pageContent.innerHTML = `
-          <div class="dashboard-grid">
-            <div class="card stat-card">
-              <div class="stat-value" id="totalDrivers">0</div>
-              <div class="stat-label">Total Drivers</div>
-              <i class="fas fa-users stat-icon"></i>
-            </div>
-            <div class="card stat-card">
-              <div class="stat-value" id="activeVehicles">0</div>
-              <div class="stat-label">Active Vehicles</div>
-              <i class="fas fa-truck stat-icon"></i>
-            </div>
-            <div class="card stat-card">
-              <div class="stat-value" id="pendingTenders">0</div>
-              <div class="stat-label">Pending Tenders</div>
-              <i class="fas fa-file-contract stat-icon"></i>
-            </div>
-            <div class="card stat-card">
-              <div class="stat-value" id="revenue">0</div>
-              <div class="stat-label">Revenue</div>
-              <i class="fas fa-dollar-sign stat-icon"></i>
-            </div>
-          </div>
-        `;
-        updateDashboardStats();
-        return;
-      }
-      
+
       // Show loading indicator
-      pageContent.innerHTML = '<div class="loading">Loading...</div>';
+      pageContent.innerHTML = '<div class="loading"></div>';
 
       const module = moduleFiles[pageName];
       if (module) {
-        // Fetch and load the HTML file
-        fetch(module.html)
+        fetch(module)
           .then(response => {
-            if (!response.ok) {
-              throw new Error(`Failed to load ${module.html}`);
-            }
+            if (!response.ok) throw new Error(response.statusText);
             return response.text();
           })
           .then(html => {
             pageContent.innerHTML = html;
-            
-            // Now, load and execute the corresponding JavaScript file
-            if (module.js) {
-              currentScript = document.createElement('script');
-              currentScript.src = module.js;
-              document.body.appendChild(currentScript);
-            }
           })
           .catch(error => {
-            pageContent.innerHTML = `<div class="card"><h3 class="text-danger">Error Loading Page</h3><p>${error.message}</p></div>`;
+            pageContent.innerHTML = `<div class="card"><h3 class="text-danger">Error</h3><p>${error.message}</p></div>`;
           });
       } else {
-        pageContent.innerHTML = `<div class="card"><h3 class="text-danger">Module Not Found</h3><p>The page for "${pageName}" could not be found. Please check your moduleFiles mapping.</p></div>`;
+        pageContent.innerHTML = `<div class="card"><h3 class="text-danger">Module Not Found</h3><p>Module file for ${pageName} not found.</p></div>`;
       }
     }
-    
-    // Function to update dashboard stats
-    function updateDashboardStats() {
-      // This is a placeholder - in a real app, you'd fetch these values from your data
-      const totalDrivers = document.getElementById('totalDrivers');
-      const activeVehicles = document.getElementById('activeVehicles');
-      const pendingTenders = document.getElementById('pendingTenders');
-      const revenue = document.getElementById('revenue');
-      
-      if (totalDrivers) totalDrivers.textContent = '12';
-      if (activeVehicles) activeVehicles.textContent = '8';
-      if (pendingTenders) pendingTenders.textContent = '5';
-      if (revenue) revenue.textContent = '$12,450';
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
     }
   </script>
 </body>
