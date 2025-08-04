@@ -1,44 +1,37 @@
 <svg width="300" height="400" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="300" height="400" fill="#f9f9f9" />
+  <!-- Background (optional) -->
+  <rect width="300" height="400" fill="#f8f8f8"/>
 
-  <!-- Golden Mask - Symmetrical Low-Poly Design -->
-  <!-- Main face outline (diamond-like, stylized) -->
-  <polygon points="150,40 210,90 220,160 200,230 150,280 100,230 90,160 110,90" 
-           fill="#D4AF37" stroke="#B8860B" stroke-width="1.2"/>
+  <!-- Low-Poly Golden Mask Base -->
+  <g transform="translate(0, 20)">
+    <!-- Main face shape – angular and symmetrical -->
+    <polygon points="150,30 210,80 220,140 210,210 180,260 150,270 120,260 90,210 80,140 90,80"
+             fill="#D4AF37" stroke="#B8860B" stroke-width="1.2"/>
 
-  <!-- Left Eye (low-poly triangle) -->
-  <polygon points="120,140 132,135 140,145 128,150" 
-           fill="#1a1a1a" />
+    <!-- Left Eye Hole -->
+    <polygon points="125,150 135,145 145,155 135,160"
+             fill="#111" />
 
-  <!-- Right Eye -->
-  <polygon points="180,140 192,135 200,145 188,150" 
-           fill="#1a1a1a" />
+    <!-- Right Eye Hole -->
+    <polygon points="175,150 185,145 195,155 185,160"
+             fill="#111" />
 
-  <!-- Nose bridge and tip -->
-  <polygon points="150,150 160,150 155,175" 
-           fill="#C5A82D" />
+    <!-- Forehead facet -->
+    <polygon points="150,30 130,80 170,80" fill="#FFD700" opacity="0.2"/>
 
-  <!-- Nostrils (optional subtle detail) -->
-  <circle cx="150" cy="175" r="2" fill="#1a1a1a" opacity="0.6"/>
+    <!-- Cheek facets -->
+    <polygon points="90,80 120,130 80,140" fill="#CD9B1D" opacity="0.15"/>
+    <polygon points="210,80 180,130 220,140" fill="#CD9B1D" opacity="0.15"/>
 
-  <!-- Mouth area -->
-  <polygon points="140,200 160,200 165,220 135,220" 
-           fill="#E6C04C" />
+    <!-- Upper cheek / temple facets -->
+    <polygon points="90,80 110,110 120,130 80,140" fill="#E6C04C" opacity="0.2"/>
+    <polygon points="210,80 190,110 180,130 220,140" fill="#E6C04C" opacity="0.2"/>
 
-  <!-- Forehead highlight -->
-  <polygon points="150,40 130,90 170,90" 
-           fill="#FFD700" opacity="0.2" />
+    <!-- Chin / lower face facet -->
+    <polygon points="120,260 180,260 150,270" fill="#C5A82D" />
 
-  <!-- Cheek highlights -->
-  <polygon points="110,90 130,135 100,160" fill="#E0C05E" opacity="0.3"/>
-  <polygon points="190,90 170,135 200,160" fill="#E0C05E" opacity="0.3"/>
-
-  <!-- Chin detail -->
-  <polygon points="150,280 140,250 160,250" fill="#C5A82D" />
-
-  <!-- Optional: subtle outline for clarity -->
-  <path d="M150,40 L210,90 L220,160 L200,230 L150,280 L100,230 L90,160 L110,90 Z" 
-        fill="none" stroke="#B8860B" stroke-width="1.5" opacity="0.5"/>
-
+    <!-- Optional subtle outline for definition -->
+    <path d="M150,30 L210,80 L220,140 L210,210 L180,260 L150,270 L120,260 L90,210 L80,140 L90,80 Z"
+          fill="none" stroke="#B8860B" stroke-width="1" opacity="0.4"/>
+  </g>
 </svg>
